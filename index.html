@@ -738,6 +738,26 @@
     </div> 
    </div> 
   </div> 
+  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
+  <script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/12.10.0/firebase-app.js";
+  import { getAnalytics } from "https://www.gstatic.com/firebasejs/12.10.0/firebase-analytics.js";
+  const firebaseConfig = {
+    apiKey: "AIzaSyAydlEggsCk3BiYdk6IdSSPAbuVfWbXitM",
+    authDomain: "fth-organisation-6b34a.firebaseapp.com",
+    databaseURL: "https://fth-organisation-6b34a-default-rtdb.firebaseio.com",
+    projectId: "fth-organisation-6b34a",
+    storageBucket: "fth-organisation-6b34a.firebasestorage.app",
+    messagingSenderId: "104619661339",
+    appId: "1:104619661339:web:b7534c7376dab4836540be",
+    measurementId: "G-6E31M6H6NC"
+  };
+
+  // Initialize Firebase
+  const app = initializeApp(firebaseConfig);
+  const analytics = getAnalytics(app);
+</script>
   <script>
         let chartDaily, chartExpense, chartPayroll;
         let chartEmpGauge, chartEmpTask;
