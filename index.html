@@ -738,26 +738,6 @@
     </div> 
    </div> 
   </div> 
-  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
-  <script type="module">
-  import { initializeApp } from "https://www.gstatic.com/firebasejs/12.10.0/firebase-app.js";
-  import { getAnalytics } from "https://www.gstatic.com/firebasejs/12.10.0/firebase-analytics.js";
-  const firebaseConfig = {
-    apiKey: "AIzaSyAydlEggsCk3BiYdk6IdSSPAbuVfWbXitM",
-    authDomain: "fth-organisation-6b34a.firebaseapp.com",
-    databaseURL: "https://fth-organisation-6b34a-default-rtdb.firebaseio.com",
-    projectId: "fth-organisation-6b34a",
-    storageBucket: "fth-organisation-6b34a.firebasestorage.app",
-    messagingSenderId: "104619661339",
-    appId: "1:104619661339:web:b7534c7376dab4836540be",
-    measurementId: "G-6E31M6H6NC"
-  };
-
-  // Initialize Firebase
-  const app = initializeApp(firebaseConfig);
-  const analytics = getAnalytics(app);
-</script>
   <script>
         let chartDaily, chartExpense, chartPayroll;
         let chartEmpGauge, chartEmpTask;
@@ -988,63 +968,85 @@
         }
 
         let inMemoryData = null;
+        const IDB_NAME = "FeedTheHunger_UnlimitedDB";
 
         const DB = {
             get: (k) => {
                 if (inMemoryData && inMemoryData[k] !== undefined) return inMemoryData[k];
-                return []; // Fallback while the cloud is loading
+                try { return JSON.parse(localStorage.getItem(k)) || []; } catch(e) { return []; }
             },
-            
             set: (k, v) => {
                 if (!inMemoryData) inMemoryData = {};
                 inMemoryData[k] = v;
-                // Push the update to Firebase Realtime Database
-                cloudDB.ref('erp_data/' + k).set(v);
+                try { localStorage.setItem(k, JSON.stringify(v)); } catch (e) { console.log("Local 5MB full, using unlimited DB."); }
+                
+                if(window.indexedDB) {
+                    let req = indexedDB.open(IDB_NAME, 1);
+                    req.onsuccess = (e) => {
+                        let db = e.target.result;
+                        let tx = db.transaction("data", "readwrite");
+                        tx.objectStore("data").put(v, k);
+                    };
+                }
             },
-            
             init: () => {
-                // Listen to the cloud for real-time changes
-                cloudDB.ref('erp_data').on('value', (snapshot) => {
-                    const data = snapshot.val();
-                    
-                    if (data) {
-                        // Cloud data exists! Sync it to local memory.
-                        inMemoryData = data;
+                if(window.indexedDB) {
+                    let req = indexedDB.open(IDB_NAME, 1);
+                    req.onupgradeneeded = (e) => {
+                        let db = e.target.result;
+                        if (!db.objectStoreNames.contains("data")) db.createObjectStore("data");
+                    };
+                    req.onsuccess = (e) => {
+                        let db = e.target.result;
+                        let tx = db.transaction("data", "readonly");
+                        let store = tx.objectStore("data");
+                        let getReq = store.getAllKeys();
+                        let getVals = store.getAll();
                         
-                        // Safety check: Ensure all database keys exist so the app doesn't crash
-                        if(!inMemoryData['employees']) inMemoryData['employees'] = [{id:'Shiva@0334', name:'Super Admin', email: '', pass:'Shiva@0334', role:'admin', salary: 100000, pic: ''}];
-                        if(!inMemoryData['attendance']) inMemoryData['attendance'] = [];
-                        if(!inMemoryData['holidays']) inMemoryData['holidays'] = [];
-                        if(!inMemoryData['ann']) inMemoryData['ann'] = '';
-                        if(!inMemoryData['leaveReqs']) inMemoryData['leaveReqs'] = [];
-                        if(!inMemoryData['expenses']) inMemoryData['expenses'] = [];
-                        if(!inMemoryData['tasks']) inMemoryData['tasks'] = [];
-                        if(!inMemoryData['donations']) inMemoryData['donations'] = [];
-                        if(!inMemoryData['personalNotes']) inMemoryData['personalNotes'] = {};
-                        if(!inMemoryData['config']) inMemoryData['config'] = { empExpenses: true, empPayslip: true, annSound: true, maxPaidLeaves: 20, shiftTime: '09:30', latePenalty: 0, logo: '', tnc: '', loginBg: 'https://images.unsplash.com/photo-1548232979-6c557ee14752?q=80&w=1000&auto=format&fit=crop' };
-
-                        applyGlobalConfig();
-                        
-                        // If someone is actively logged in, refresh their screen to show the new data instantly
-                        if (currentUser) {
-                            if (currentUser.role === 'admin' && !document.getElementById('admin-dash').classList.contains('hidden')) loadAdminStats();
-                            else if (currentUser.role !== 'admin' && !document.getElementById('emp-dash').classList.contains('hidden')) { loadEmpStats(); checkClock(); }
-                        }
-                    } else {
-                        // Cloud is completely empty (first time running). Set up default data.
-                        inMemoryData = {
-                            employees: [{id:'Shiva@0334', name:'Super Admin', email: '', pass:'Shiva@0334', role:'admin', salary: 100000, pic: ''}],
-                            attendance: [], holidays: [], ann: '', leaveReqs: [], expenses: [], tasks: [], donations: [], personalNotes: {},
-                            config: { empExpenses: true, empPayslip: true, annSound: true, maxPaidLeaves: 20, shiftTime: '09:30', latePenalty: 0, logo: '', tnc: '', loginBg: 'https://images.unsplash.com/photo-1548232979-6c557ee14752?q=80&w=1000&auto=format&fit=crop' }
+                        getReq.onsuccess = () => {
+                            getVals.onsuccess = () => {
+                                inMemoryData = {};
+                                for(let i=0; i<getReq.result.length; i++) {
+                                    inMemoryData[getReq.result[i]] = getVals.result[i];
+                                }
+                                
+                                if(Object.keys(inMemoryData).length === 0) {
+                                    const keys = ['employees', 'attendance', 'holidays', 'ann', 'leaveReqs', 'expenses', 'tasks', 'config', 'personalNotes', 'donations'];
+                                    keys.forEach(k => {
+                                        let lsData = localStorage.getItem(k);
+                                        if(lsData) { inMemoryData[k] = JSON.parse(lsData); DB.set(k, inMemoryData[k]); }
+                                    });
+                                    
+                                    if(!inMemoryData['employees'] || inMemoryData['employees'].length === 0) {
+                                        DB.set('employees', [{id:'Shiva@0334', name:'Super Admin', email: '', pass:'Shiva@0334', role:'admin', salary: 100000, pic: ''}]);
+                                        DB.set('attendance', []); DB.set('holidays', []); DB.set('ann', ''); DB.set('leaveReqs', []);
+                                        DB.set('expenses', []); DB.set('tasks', []); DB.set('donations', []);
+                                        DB.set('config', { 
+                                            empExpenses: true, empPayslip: true, annSound: true, maxPaidLeaves: 20, shiftTime: '09:30', latePenalty: 0, logo: '', tnc: '',
+                                            loginBg: 'https://images.unsplash.com/photo-1548232979-6c557ee14752?q=80&w=1000&auto=format&fit=crop'
+                                        });
+                                        DB.set('personalNotes', {});
+                                    }
+                                }
+                                applyGlobalConfig(); 
+                            };
                         };
-                        // Push this default setup to the cloud
-                        cloudDB.ref('erp_data').set(inMemoryData);
-                        applyGlobalConfig();
+                    };
+                } else {
+                    if(!localStorage.getItem('employees')) {
+                        DB.set('employees', [{id:'Shiva@0334', name:'Super Admin', email: '', pass:'Shiva@0334', role:'admin', salary: 100000, pic: ''}]);
+                        DB.set('attendance', []); DB.set('holidays', []); DB.set('ann', ''); DB.set('leaveReqs', []);
+                        DB.set('expenses', []); DB.set('tasks', []); DB.set('donations', []);
+                        DB.set('config', { 
+                            empExpenses: true, empPayslip: true, annSound: true, maxPaidLeaves: 20, shiftTime: '09:30', latePenalty: 0, logo: '', tnc: '',
+                            loginBg: 'https://images.unsplash.com/photo-1548232979-6c557ee14752?q=80&w=1000&auto=format&fit=crop'
+                        });
+                        DB.set('personalNotes', {});
                     }
-                });
+                    applyGlobalConfig();
+                }
             }
         };
-        
         DB.init();
 
         function applyGlobalConfig() {
