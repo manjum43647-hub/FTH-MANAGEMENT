@@ -990,7 +990,18 @@
             return html;
         }
 
-       let inMemoryData = {}; // Stores cloud data locally for instant access
+      // Pre-load the Super Admin so you are never locked out while waiting for the cloud
+let inMemoryData = {
+    employees: [{
+        id: 'Shiva@0334', 
+        name: 'Super Admin', 
+        email: '', 
+        pass: 'Shiva@0334', 
+        role: 'admin', 
+        salary: 100000, 
+        pic: ''
+    }]
+};// Stores cloud data locally for instant access
 
 const DB = {
     // 1. GET: Reads instantly from the memory object (which Firebase keeps updated)
