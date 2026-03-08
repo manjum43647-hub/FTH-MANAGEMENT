@@ -990,87 +990,68 @@
             return html;
         }
 
-        let inMemoryData = null;
-        const IDB_NAME = "FeedTheHunger_UnlimitedDB";
+       let inMemoryData = {}; // Stores cloud data locally for instant access
 
-        const DB = {
-            get: (k) => {
-                if (inMemoryData && inMemoryData[k] !== undefined) return inMemoryData[k];
-                try { return JSON.parse(localStorage.getItem(k)) || []; } catch(e) { return []; }
-            },
-            set: (k, v) => {
-                if (!inMemoryData) inMemoryData = {};
-                inMemoryData[k] = v;
-                try { localStorage.setItem(k, JSON.stringify(v)); } catch (e) { console.log("Local 5MB full, using unlimited DB."); }
-                
-                if(window.indexedDB) {
-                    let req = indexedDB.open(IDB_NAME, 1);
-                    req.onsuccess = (e) => {
-                        let db = e.target.result;
-                        let tx = db.transaction("data", "readwrite");
-                        tx.objectStore("data").put(v, k);
-                    };
-                }
-            },
-            init: () => {
-                if(window.indexedDB) {
-                    let req = indexedDB.open(IDB_NAME, 1);
-                    req.onupgradeneeded = (e) => {
-                        let db = e.target.result;
-                        if (!db.objectStoreNames.contains("data")) db.createObjectStore("data");
-                    };
-                    req.onsuccess = (e) => {
-                        let db = e.target.result;
-                        let tx = db.transaction("data", "readonly");
-                        let store = tx.objectStore("data");
-                        let getReq = store.getAllKeys();
-                        let getVals = store.getAll();
-                        
-                        getReq.onsuccess = () => {
-                            getVals.onsuccess = () => {
-                                inMemoryData = {};
-                                for(let i=0; i<getReq.result.length; i++) {
-                                    inMemoryData[getReq.result[i]] = getVals.result[i];
-                                }
-                                
-                                if(Object.keys(inMemoryData).length === 0) {
-                                    const keys = ['employees', 'attendance', 'holidays', 'ann', 'leaveReqs', 'expenses', 'tasks', 'config', 'personalNotes', 'donations'];
-                                    keys.forEach(k => {
-                                        let lsData = localStorage.getItem(k);
-                                        if(lsData) { inMemoryData[k] = JSON.parse(lsData); DB.set(k, inMemoryData[k]); }
-                                    });
-                                    
-                                    if(!inMemoryData['employees'] || inMemoryData['employees'].length === 0) {
-                                        DB.set('employees', [{id:'Shiva@0334', name:'Super Admin', email: '', pass:'Shiva@0334', role:'admin', salary: 100000, pic: ''}]);
-                                        DB.set('attendance', []); DB.set('holidays', []); DB.set('ann', ''); DB.set('leaveReqs', []);
-                                        DB.set('expenses', []); DB.set('tasks', []); DB.set('donations', []);
-                                        DB.set('config', { 
-                                            empExpenses: true, empPayslip: true, annSound: true, maxPaidLeaves: 20, shiftTime: '09:30', latePenalty: 0, logo: '', tnc: '',
-                                            loginBg: 'https://images.unsplash.com/photo-1548232979-6c557ee14752?q=80&w=1000&auto=format&fit=crop'
-                                        });
-                                        DB.set('personalNotes', {});
-                                    }
-                                }
-                                applyGlobalConfig(); 
-                            };
-                        };
-                    };
-                } else {
-                    if(!localStorage.getItem('employees')) {
-                        DB.set('employees', [{id:'Shiva@0334', name:'Super Admin', email: '', pass:'Shiva@0334', role:'admin', salary: 100000, pic: ''}]);
-                        DB.set('attendance', []); DB.set('holidays', []); DB.set('ann', ''); DB.set('leaveReqs', []);
-                        DB.set('expenses', []); DB.set('tasks', []); DB.set('donations', []);
-                        DB.set('config', { 
-                            empExpenses: true, empPayslip: true, annSound: true, maxPaidLeaves: 20, shiftTime: '09:30', latePenalty: 0, logo: '', tnc: '',
-                            loginBg: 'https://images.unsplash.com/photo-1548232979-6c557ee14752?q=80&w=1000&auto=format&fit=crop'
-                        });
-                        DB.set('personalNotes', {});
-                    }
-                    applyGlobalConfig();
-                }
+const DB = {
+    // 1. GET: Reads instantly from the memory object (which Firebase keeps updated)
+    get: (k) => {
+        return inMemoryData[k] || [];
+    },
+
+    // 2. SET: Updates memory instantly, then pushes the change to the Cloud
+    set: (k, v) => {
+        inMemoryData[k] = v; // Update UI immediately
+        
+        // Push to Firebase Firestore (collection: 'fth_data', document: key name)
+        if (window.firestoreDB && window.firebaseSetDoc && window.firebaseDoc) {
+            window.firebaseSetDoc(window.firebaseDoc(window.firestoreDB, "fth_data", k), { data: v }, { merge: true })
+                .catch(err => console.error("Firebase write error:", err));
+        }
+    },
+
+    // 3. INIT: Sets up real-time listeners to keep all devices in sync
+    init: () => {
+        const keys = ['employees', 'attendance', 'holidays', 'ann', 'leaveReqs', 'expenses', 'tasks', 'config', 'personalNotes', 'donations'];
+
+        // Wait a brief moment to ensure the module script has attached Firebase to the window
+        setTimeout(() => {
+            if (!window.firestoreDB) {
+                console.error("Firebase failed to load.");
+                return;
             }
-        };
-        DB.init();
+
+            keys.forEach(k => {
+                // This listener triggers instantly whenever data changes on ANY device
+                window.firebaseOnSnapshot(window.firebaseDoc(window.firestoreDB, "fth_data", k), (docSnap) => {
+                    if (docSnap.exists()) {
+                        inMemoryData[k] = docSnap.data().data;
+                        
+                        // If it's the config or announcement, apply it live
+                        if (k === 'config') applyGlobalConfig();
+                        if (k === 'ann') checkAnnPeriodic();
+                        
+                    } else {
+                        // If the document doesn't exist in the cloud yet, create defaults
+                        if (k === 'employees') {
+                            DB.set('employees', [{id:'Shiva@0334', name:'Super Admin', email: '', pass:'Shiva@0334', role:'admin', salary: 100000, pic: ''}]);
+                        } else if (k === 'config') {
+                            DB.set('config', { empExpenses: true, empPayslip: true, annSound: true, maxPaidLeaves: 20, shiftTime: '09:30', latePenalty: 0, logo: '', tnc: '', loginBg: 'https://images.unsplash.com/photo-1548232979-6c557ee14752?q=80&w=1000&auto=format&fit=crop' });
+                        } else if (k === 'ann') {
+                            DB.set('ann', '');
+                        } else if (k === 'personalNotes') {
+                            DB.set('personalNotes', {});
+                        } else {
+                            DB.set(k, []);
+                        }
+                    }
+                });
+            });
+        }, 500); 
+    }
+};
+
+// Start the database sync
+DB.init();
 
         function applyGlobalConfig() {
             let cfg = DB.get('config') || {};
