@@ -117,31 +117,7 @@
         .chart-box canvas { max-height: 250px; }
     </style> 
  </head> 
- <script type="module">
-// Import the functions you need from the SDKs you need
-import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
-import { getAnalytics } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-analytics.js";
-// TODO: Add SDKs for Firebase products that you want to use
-// https://firebase.google.com/docs/web/setup#available-libraries
-
-// Your web app's Firebase configuration
-// For Firebase JS SDK v7.20.0 and later, measurementId is optional
-const firebaseConfig = {
-  apiKey: "YOUR_KEY",
-  authDomain: "fth-organisation.firebaseapp.com",
-  projectId: "fth-organisation",
-  storageBucket: "fth-organisation.firebasestorage.app",
-  messagingSenderId: "839508189642",
-  appId: "1:839508189642:web:5c26880d251c5799626f33",
-  measurementId: "G-2CK8PDD3CS",
-  databaseURL: "https://fth-organisation-default-rtdb.firebaseio.com/"
-};
-
-// Initialize Firebase
-const app = initializeApp(firebaseConfig);
-const analytics = getAnalytics(app);
-const database = getDatabase(app);
-</script>
+ 
  <body> 
   <div id="login-screen"> 
    <div class="card" style="width: 380px; max-width: 100%; text-align: center; margin-bottom: 0;"> 
@@ -2426,5 +2402,27 @@ const database = getDatabase(app);
             }
         }
     </script> 
- 
+ <script type="module">
+  // Import the functions you need from the SDKs you need
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/12.10.0/firebase-app.js";
+  import { getAnalytics } from "https://www.gstatic.com/firebasejs/12.10.0/firebase-analytics.js";
+  // TODO: Add SDKs for Firebase products that you want to use
+  // https://firebase.google.com/docs/web/setup#available-libraries
+
+  // Your web app's Firebase configuration
+  // For Firebase JS SDK v7.20.0 and later, measurementId is optional
+  const firebaseConfig = {
+    apiKey: "AIzaSyAydlEggsCk3BiYdk6IdSSPAbuVfWbXitM",
+    authDomain: "fth-organisation-6b34a.firebaseapp.com",
+    projectId: "fth-organisation-6b34a",
+    storageBucket: "fth-organisation-6b34a.firebasestorage.app",
+    messagingSenderId: "104619661339",
+    appId: "1:104619661339:web:d03b2a5b0c9bf5786540be",
+    measurementId: "G-F0B5DJCX31"
+  };
+
+  // Initialize Firebase
+  const app = initializeApp(firebaseConfig);
+  const analytics = getAnalytics(app);
+</script>
 </body></html> 
