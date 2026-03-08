@@ -117,6 +117,23 @@
         .chart-box canvas { max-height: 250px; }
     </style> 
  </head> 
+ <script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+import { getFirestore, addDoc, collection } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+
+const firebaseConfig = {
+  apiKey: "YOUR_API_KEY",
+  authDomain: "YOUR_PROJECT.firebaseapp.com",
+  projectId: "YOUR_PROJECT_ID"
+};
+
+const app = initializeApp(firebaseConfig);
+const db = getFirestore(app);
+
+async function saveData(name) {
+  await addDoc(collection(db, "users"), { name: name });
+}
+</script>
  <body> 
   <div id="login-screen"> 
    <div class="card" style="width: 380px; max-width: 100%; text-align: center; margin-bottom: 0;"> 
