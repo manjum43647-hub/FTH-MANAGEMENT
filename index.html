@@ -158,16 +158,30 @@
     <h4 style="margin-bottom: 25px;">SEVA SANGHA</h4> 
     
     <div id="login-form-area">
-        <input type="text" id="username" placeholder="Employee ID"> 
-        <div class="password-wrapper">
-            <input type="password" id="password" placeholder="Password">
-            <i class="fa-solid fa-eye" id="toggle-password-icon" onclick="toggleLoginPassword()"></i>
+        
+        <div id="login-step-1">
+            <input type="text" id="username" placeholder="Enter Employee ID"> 
+            <button class="btn btn-primary" id="verify-btn" style="width:100%; margin-top:15px; padding: 12px;" onclick="verifyStaffId()">Next <i class="fa-solid fa-arrow-right"></i></button>
+            <div style="display:flex; justify-content:center; margin-top:20px; font-size:0.75rem; color:rgba(255,255,255,0.8);">
+                <p onclick="secureReset()" style="cursor:pointer; opacity: 0.6;">System Reset</p> 
+            </div>
         </div>
-        <button class="btn btn-primary" id="login-btn" style="width:100%; margin-top:15px; padding: 12px;" onclick="login()">Log In</button> 
-        <div style="display:flex; justify-content:space-between; margin-top:20px; font-size:0.75rem; color:rgba(255,255,255,0.8);">
-            <p onclick="showForgotPassword()" style="cursor:pointer; text-decoration:underline;">Forgot Password?</p>
-            <p onclick="secureReset()" style="cursor:pointer; opacity: 0.6;">System Reset</p> 
+
+        <div id="login-step-2" class="hidden">
+            <p id="login-user-name-display" style="color:#fef08a; font-weight:bold; margin-bottom:15px; font-size:1.1rem;"></p>
+            <div class="password-wrapper">
+                <input type="password" id="password" placeholder="Enter Password">
+                <i class="fa-solid fa-eye" id="toggle-password-icon" onclick="toggleLoginPassword()"></i>
+            </div>
+            <div style="display:flex; gap:10px; margin-top:15px;">
+                <button class="btn btn-warning" style="padding: 12px;" onclick="backToStaffId()"><i class="fa-solid fa-arrow-left"></i></button>
+                <button class="btn btn-primary" id="login-btn" style="width:100%; padding: 12px;" onclick="login()">Secure Log In</button> 
+            </div>
+            <div style="display:flex; justify-content:center; margin-top:20px; font-size:0.75rem; color:rgba(255,255,255,0.8);">
+                <p onclick="showForgotPassword()" style="cursor:pointer; text-decoration:underline;">Forgot Password?</p>
+            </div>
         </div>
+
     </div>
 
     <div id="forgot-password-area" class="hidden" style="position:absolute; inset:0; background:rgba(59,40,90,0.95); z-index:10; display:flex; flex-direction:column; justify-content:center; align-items:center; padding:30px;">
@@ -231,38 +245,29 @@
     <img id="sidebar-logo" src="" style="max-height:40px; max-width:100%; object-fit:contain; display:none; margin: 0 auto 10px auto; border-radius: 5px;"> <span>FEED THE HUNGER SEVA SANGHA</span> 
    </div> 
    <div id="admin-links" class="hidden"> 
-       <a onclick="navigate('admin-dash')"><i class="fa-solid fa-chart-pie"></i> Dashboard</a> 
-       <a onclick="navigate('admin-staff')"><i class="fa-solid fa-users-gear"></i> Staff Directory</a> 
-       <a onclick="navigate('admin-attendance')"><i class="fa-solid fa-user-clock"></i> Attendance Logs</a> 
-       <a onclick="navigate('admin-donations')"><i class="fa-solid fa-hand-holding-heart"></i> Donation Logs</a> 
-       
+       <a onclick="navigate('admin-dash')"><div style="position:relative; margin-right:15px; width:20px; display:flex; justify-content:center;"><i class="fa-solid fa-chart-pie" style="margin-right:0;"></i><span id="badge-admin-dash" class="nav-badge hidden" style="position:absolute; top:-8px; right:-15px; padding:2px 4px; font-size:0.6rem; border:2px solid var(--primary);">0</span></div> Dashboard</a> 
+       <a onclick="navigate('admin-staff')"><div style="position:relative; margin-right:15px; width:20px; display:flex; justify-content:center;"><i class="fa-solid fa-users-gear" style="margin-right:0;"></i><span id="badge-admin-staff" class="nav-badge hidden" style="position:absolute; top:-8px; right:-15px; padding:2px 4px; font-size:0.6rem; border:2px solid var(--primary);">0</span></div> Staff Directory</a> 
+       <a onclick="navigate('admin-attendance')"><div style="position:relative; margin-right:15px; width:20px; display:flex; justify-content:center;"><i class="fa-solid fa-user-clock" style="margin-right:0;"></i><span id="badge-admin-attendance" class="nav-badge hidden" style="position:absolute; top:-8px; right:-15px; padding:2px 4px; font-size:0.6rem; border:2px solid var(--primary);">0</span></div> Attendance Logs</a> 
+       <a onclick="navigate('admin-donations')"><div style="position:relative; margin-right:15px; width:20px; display:flex; justify-content:center;"><i class="fa-solid fa-hand-holding-heart" style="margin-right:0;"></i><span id="badge-admin-donations" class="nav-badge hidden" style="position:absolute; top:-8px; right:-15px; padding:2px 4px; font-size:0.6rem; border:2px solid var(--primary);">0</span></div> Donation Logs</a> 
        <a onclick="navigate('admin-leaves')"><div style="position:relative; margin-right:15px; width:20px; display:flex; justify-content:center;"><i class="fa-solid fa-envelope-open-text" style="margin-right:0;"></i><span id="badge-admin-leaves" class="nav-badge hidden" style="position:absolute; top:-8px; right:-15px; padding:2px 4px; font-size:0.6rem; border:2px solid var(--primary);">0</span></div> Leave Requests</a> 
        <a onclick="navigate('admin-resign')"><div style="position:relative; margin-right:15px; width:20px; display:flex; justify-content:center;"><i class="fa-solid fa-user-slash" style="margin-right:0;"></i><span id="badge-admin-resign" class="nav-badge hidden" style="position:absolute; top:-8px; right:-15px; padding:2px 4px; font-size:0.6rem; border:2px solid var(--primary);">0</span></div> Resignations</a> 
-       
-       <a onclick="navigate('admin-salary')"><i class="fa-solid fa-indian-rupee-sign"></i> Payroll</a> 
-       
+       <a onclick="navigate('admin-salary')"><div style="position:relative; margin-right:15px; width:20px; display:flex; justify-content:center;"><i class="fa-solid fa-indian-rupee-sign" style="margin-right:0;"></i><span id="badge-admin-salary" class="nav-badge hidden" style="position:absolute; top:-8px; right:-15px; padding:2px 4px; font-size:0.6rem; border:2px solid var(--primary);">0</span></div> Payroll</a> 
        <a onclick="navigate('admin-expenses')"><div style="position:relative; margin-right:15px; width:20px; display:flex; justify-content:center;"><i class="fa-solid fa-file-invoice-dollar" style="margin-right:0;"></i><span id="badge-admin-expenses" class="nav-badge hidden" style="position:absolute; top:-8px; right:-15px; padding:2px 4px; font-size:0.6rem; border:2px solid var(--primary);">0</span></div> Expense Claims</a> 
-       
-       <a onclick="navigate('admin-tasks')"><i class="fa-solid fa-list-check"></i> Assign Tasks</a> 
-       <a onclick="navigate('admin-id')"><i class="fa-solid fa-id-card"></i> ID Studio</a> 
-       <a onclick="navigate('admin-holidays')"><i class="fa-solid fa-calendar-check"></i> Holidays</a> 
-       <a onclick="navigate('admin-reports')"><i class="fa-solid fa-file-pdf"></i> Monthly Reports</a> 
+       <a onclick="navigate('admin-tasks')"><div style="position:relative; margin-right:15px; width:20px; display:flex; justify-content:center;"><i class="fa-solid fa-list-check" style="margin-right:0;"></i><span id="badge-admin-tasks" class="nav-badge hidden" style="position:absolute; top:-8px; right:-15px; padding:2px 4px; font-size:0.6rem; border:2px solid var(--primary);">0</span></div> Assign Tasks</a> 
+       <a onclick="navigate('admin-id')"><div style="position:relative; margin-right:15px; width:20px; display:flex; justify-content:center;"><i class="fa-solid fa-id-card" style="margin-right:0;"></i><span id="badge-admin-id" class="nav-badge hidden" style="position:absolute; top:-8px; right:-15px; padding:2px 4px; font-size:0.6rem; border:2px solid var(--primary);">0</span></div> ID Studio</a> 
+       <a onclick="navigate('admin-holidays')"><div style="position:relative; margin-right:15px; width:20px; display:flex; justify-content:center;"><i class="fa-solid fa-calendar-check" style="margin-right:0;"></i><span id="badge-admin-holidays" class="nav-badge hidden" style="position:absolute; top:-8px; right:-15px; padding:2px 4px; font-size:0.6rem; border:2px solid var(--primary);">0</span></div> Holidays</a> 
+       <a onclick="navigate('admin-reports')"><div style="position:relative; margin-right:15px; width:20px; display:flex; justify-content:center;"><i class="fa-solid fa-file-pdf" style="margin-right:0;"></i><span id="badge-admin-reports" class="nav-badge hidden" style="position:absolute; top:-8px; right:-15px; padding:2px 4px; font-size:0.6rem; border:2px solid var(--primary);">0</span></div> Monthly Reports</a> 
        <a onclick="navigate('sys-options')"><i class="fa-solid fa-sliders"></i> Settings & Options</a> 
    </div> 
    <div id="emp-links" class="hidden"> 
        <a onclick="navigate('emp-dash')"><div style="position:relative; margin-right:15px; width:20px; display:flex; justify-content:center;"><i class="fa-solid fa-house" style="margin-right:0;"></i><span id="badge-emp-dash" class="nav-badge hidden" style="position:absolute; top:-8px; right:-10px; padding:2px 5px; font-size:0.6rem; border:2px solid var(--primary);">!</span></div> Workspace</a> 
-       <a onclick="navigate('emp-attendance')"><i class="fa-solid fa-clock-rotate-left"></i> My Attendance</a> 
-       
+       <a onclick="navigate('emp-attendance')"><div style="position:relative; margin-right:15px; width:20px; display:flex; justify-content:center;"><i class="fa-solid fa-clock-rotate-left" style="margin-right:0;"></i><span id="badge-emp-attendance" class="nav-badge hidden" style="position:absolute; top:-8px; right:-15px; padding:2px 4px; font-size:0.6rem; border:2px solid var(--primary);">0</span></div> My Attendance</a> 
        <a onclick="navigate('emp-tasks')"><div style="position:relative; margin-right:15px; width:20px; display:flex; justify-content:center;"><i class="fa-solid fa-thumbtack" style="margin-right:0;"></i><span id="badge-emp-tasks" class="nav-badge hidden" style="position:absolute; top:-8px; right:-15px; padding:2px 4px; font-size:0.6rem; border:2px solid var(--primary);">0</span></div> My Tasks</a> 
-       
-       <a onclick="navigate('emp-donations')"><i class="fa-solid fa-hand-holding-heart"></i> Donation Tracker</a> 
-       
+       <a onclick="navigate('emp-donations')"><div style="position:relative; margin-right:15px; width:20px; display:flex; justify-content:center;"><i class="fa-solid fa-hand-holding-heart" style="margin-right:0;"></i><span id="badge-emp-donations" class="nav-badge hidden" style="position:absolute; top:-8px; right:-15px; padding:2px 4px; font-size:0.6rem; border:2px solid var(--primary);">0</span></div> Donation Tracker</a> 
        <a onclick="navigate('emp-leaves')"><div style="position:relative; margin-right:15px; width:20px; display:flex; justify-content:center;"><i class="fa-solid fa-calendar-minus" style="margin-right:0;"></i><span id="badge-emp-leaves" class="nav-badge hidden" style="position:absolute; top:-8px; right:-15px; padding:2px 4px; font-size:0.6rem; border:2px solid var(--primary);">0</span></div> Apply Leave</a> 
-       
        <a id="link-emp-expenses" onclick="navigate('emp-expenses')"><div style="position:relative; margin-right:15px; width:20px; display:flex; justify-content:center;"><i class="fa-solid fa-hand-holding-dollar" style="margin-right:0;"></i><span id="badge-emp-expenses" class="nav-badge hidden" style="position:absolute; top:-8px; right:-15px; padding:2px 4px; font-size:0.6rem; border:2px solid var(--primary);">0</span></div> My Expenses</a> 
-       
        <a id="link-emp-slip" onclick="navigate('emp-slip')"><i class="fa-solid fa-receipt"></i> My Payslips</a> 
-       <a onclick="navigate('emp-resign')"><i class="fa-solid fa-user-slash"></i> Resignation</a> 
+       <a onclick="navigate('emp-resign')"><div style="position:relative; margin-right:15px; width:20px; display:flex; justify-content:center;"><i class="fa-solid fa-user-slash" style="margin-right:0;"></i><span id="badge-emp-resign" class="nav-badge hidden" style="position:absolute; top:-8px; right:-15px; padding:2px 4px; font-size:0.6rem; border:2px solid var(--primary);">0</span></div> Resignation</a> 
        <a onclick="navigate('sys-options')"><i class="fa-solid fa-sliders"></i> Settings & Options</a> 
    </div> 
   </div> 
@@ -949,6 +954,7 @@
     </div> 
    </div> 
   </div> 
+  <div id="toast-container"></div>
 
   <script>
         // GLOBAL VARIABLES
@@ -963,7 +969,12 @@
         let currentAdminViewEmpId = '';
         let currentAdminViewEmpName = '';
         let liveTimerInterval = null;
-        let previousCounts = { leaves: -1, resigns: -1, expenses: -1, tasks: -1 };
+        
+        let previousCounts = {
+            'admin-staff': -1, 'admin-attendance': -1, 'admin-donations': -1, 'admin-leaves': -1, 'admin-resign': -1, 'admin-expenses': -1, 'admin-tasks': -1,
+            'emp-attendance': -1, 'emp-tasks': -1, 'emp-donations': -1, 'emp-leaves': -1, 'emp-expenses': -1, 'emp-resign': -1
+        };
+        
         let currentUser = null;
         let lastAnnText = "";
 
@@ -983,7 +994,7 @@
             html += `<div><div style="font-weight:bold; color:var(--primary); font-size:0.9rem;">${timeStr}</div>`;
             
             if(locStr && locStr.includes(',')) {
-                html += `<a href="http://googleusercontent.com/maps.google.com/?q=${locStr}" target="_blank" style="font-size:0.75rem; color:var(--success); text-decoration:none;"><i class="fa-solid fa-location-dot"></i> Open Map</a>`;
+                html += `<a href="https://maps.google.com/?q=${locStr}" target="_blank" style="font-size:0.75rem; color:var(--success); text-decoration:none;"><i class="fa-solid fa-location-dot"></i> Open Map</a>`;
             } else if(locStr) {
                 html += `<span style="font-size:0.7rem; color:#94a3b8;">(${locStr})</span>`;
             } else {
@@ -1042,64 +1053,59 @@
         function toggleBadge(id, count) {
             const el = document.getElementById(id);
             if(el) {
-                if(count > 0) { el.innerText = count; el.classList.remove('hidden'); el.classList.add('new-update'); }
+                if(count > 0) { el.innerText = count > 99 ? '99+' : count; el.classList.remove('hidden'); el.classList.add('new-update'); }
                 else { el.classList.add('hidden'); el.classList.remove('new-update'); }
             }
         }
 
         function updateBadges() {
             if(!currentUser) return;
-            
             let totalNotifs = 0;
 
-            if(currentUser.role === 'admin') {
-                const lReqs = DB.get('leaveReqs').filter(r => r.status === 'Pending').length;
-                const rReqs = DB.get('resignReqs').filter(r => r.status === 'Pending').length;
-                const eReqs = DB.get('expenses').filter(r => r.status === 'Pending').length;
-
-                if(previousCounts.leaves !== -1 && lReqs > previousCounts.leaves) showToast("New Leave Request Pending!", 'admin-leaves'); 
-                if(previousCounts.resigns !== -1 && rReqs > previousCounts.resigns) showToast("New Resignation Submitted!", 'admin-resign'); 
-                if(previousCounts.expenses !== -1 && eReqs > previousCounts.expenses) showToast("New Expense Claim Submitted!", 'admin-expenses'); 
-
-                previousCounts.leaves = lReqs; previousCounts.resigns = rReqs; previousCounts.expenses = eReqs;
-
-                toggleBadge('badge-admin-leaves', lReqs);
-                toggleBadge('badge-admin-resign', rReqs);
-                toggleBadge('badge-admin-expenses', eReqs);
+            const updateSectionBadge = (sectionId, currentTotal, msg) => {
+                const seen = parseInt(localStorage.getItem('seen_' + sectionId) || 0);
+                const unread = Math.max(0, currentTotal - seen);
+                toggleBadge('badge-' + sectionId, unread);
                 
-                totalNotifs = lReqs + rReqs + eReqs;
+                if (previousCounts[sectionId] !== -1 && currentTotal > previousCounts[sectionId]) {
+                    if(msg) showToast(msg, sectionId);
+                }
+                previousCounts[sectionId] = currentTotal;
+                return unread;
+            };
+
+            if(currentUser.role === 'admin') {
+                totalNotifs += updateSectionBadge('admin-staff', DB.get('employees').length, "New Staff Member Registered!");
+                totalNotifs += updateSectionBadge('admin-attendance', DB.get('attendance').length, "New Attendance Logged!");
+                totalNotifs += updateSectionBadge('admin-donations', DB.get('donations').length, "New Donation Recorded!");
+                totalNotifs += updateSectionBadge('admin-leaves', DB.get('leaveReqs').length, "New Leave Request!");
+                totalNotifs += updateSectionBadge('admin-resign', DB.get('resignReqs').length, "New Resignation Submitted!");
+                totalNotifs += updateSectionBadge('admin-expenses', DB.get('expenses').length, "New Expense Claim!");
+                totalNotifs += updateSectionBadge('admin-tasks', DB.get('tasks').length, null); // Tasks tracked manually or quietly
             } else {
-                const tasks = DB.get('tasks').filter(t => t.empId === currentUser.id && t.status !== 'Completed').length;
-                if(previousCounts.tasks !== -1 && tasks > previousCounts.tasks) showToast("You have a new task assigned!", 'emp-tasks'); 
-                previousCounts.tasks = tasks;
-                toggleBadge('badge-emp-tasks', tasks);
+                const myAtt = DB.get('attendance').filter(a => a.id === currentUser.id).length;
+                const myTasks = DB.get('tasks').filter(t => t.empId === currentUser.id).length;
+                const myDons = DB.get('donations').filter(d => d.empId === currentUser.id).length;
+                const myLeaves = DB.get('leaveReqs').filter(l => l.empId === currentUser.id).length;
+                const myExps = DB.get('expenses').filter(e => e.empId === currentUser.id).length;
+                const myResigns = DB.get('resignReqs').filter(r => r.empId === currentUser.id).length;
 
-                // Staff Approved/Rejected tracking logic
-                const decidedLeaves = DB.get('leaveReqs').filter(r => r.empId === currentUser.id && r.status !== 'Pending').length;
-                const seenLeaves = parseInt(localStorage.getItem('seenLeaves_' + currentUser.id) || 0);
-                const newLeaves = Math.max(0, decidedLeaves - seenLeaves);
-                toggleBadge('badge-emp-leaves', newLeaves);
-                if(previousCounts.leaves !== -1 && decidedLeaves > previousCounts.leaves) showToast("Leave status updated!", 'emp-leaves');
-                previousCounts.leaves = decidedLeaves;
-
-                const decidedExps = DB.get('expenses').filter(r => r.empId === currentUser.id && r.status !== 'Pending').length;
-                const seenExps = parseInt(localStorage.getItem('seenExps_' + currentUser.id) || 0);
-                const newExps = Math.max(0, decidedExps - seenExps);
-                toggleBadge('badge-emp-expenses', newExps);
-                if(previousCounts.expenses !== -1 && decidedExps > previousCounts.expenses) showToast("Expense claim status updated!", 'emp-expenses');
-                previousCounts.expenses = decidedExps;
+                totalNotifs += updateSectionBadge('emp-attendance', myAtt, null);
+                totalNotifs += updateSectionBadge('emp-tasks', myTasks, "You have a new task assigned!");
+                totalNotifs += updateSectionBadge('emp-donations', myDons, null);
+                totalNotifs += updateSectionBadge('emp-leaves', myLeaves, "Leave Status Updated!");
+                totalNotifs += updateSectionBadge('emp-expenses', myExps, "Expense Claim Updated!");
+                totalNotifs += updateSectionBadge('emp-resign', myResigns, "Resignation Status Updated!");
 
                 const currentAnn = DB.get('ann');
-                const seenAnn = localStorage.getItem('seenAnn_' + currentUser.id) || '';
+                const seenAnn = localStorage.getItem('seen_emp-dash') || '';
                 const hasNewAnn = currentAnn && currentAnn !== seenAnn;
                 
                 const dashBadge = document.getElementById('badge-emp-dash');
                 if(dashBadge) {
-                    if(hasNewAnn) { dashBadge.innerText = '!'; dashBadge.classList.remove('hidden'); dashBadge.classList.add('new-update'); } 
+                    if(hasNewAnn) { dashBadge.innerText = '!'; dashBadge.classList.remove('hidden'); dashBadge.classList.add('new-update'); totalNotifs++; } 
                     else { dashBadge.classList.add('hidden'); dashBadge.classList.remove('new-update'); }
                 }
-
-                totalNotifs = tasks + newLeaves + newExps + (hasNewAnn ? 1 : 0);
             }
 
             const globalMenuBadge = document.getElementById('global-menu-badge');
@@ -1208,19 +1214,42 @@
         
         DB.init();
 
-        function login() {
-            const u = document.getElementById('username').value, p = document.getElementById('password').value;
-            const btn = document.getElementById('login-btn');
+        // --- PRE-LOGIN STAFF ID VERIFICATION ---
+        function verifyStaffId() {
+            const u = document.getElementById('username').value;
+            const btn = document.getElementById('verify-btn');
             
             if(Object.keys(inMemoryData).length === 0 || !inMemoryData['employees']) {
-                btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Syncing...';
+                btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Checking Cloud...';
                 btn.disabled = true;
-                setTimeout(login, 500); 
+                setTimeout(verifyStaffId, 500); 
                 return;
             }
-            btn.innerHTML = 'Log In';
+            btn.innerHTML = 'Next <i class="fa-solid fa-arrow-right"></i>';
             btn.disabled = false;
 
+            if(!u) return alert("Please enter your Employee ID.");
+
+            const emps = DB.get('employees');
+            const user = emps.find(x => x.id == u);
+            
+            if(user) {
+                document.getElementById('login-step-1').classList.add('hidden');
+                document.getElementById('login-step-2').classList.remove('hidden');
+                document.getElementById('login-user-name-display').innerText = "Hello, " + user.name;
+            } else {
+                alert("Employee ID not found in our records. Please contact Admin.");
+            }
+        }
+
+        function backToStaffId() {
+            document.getElementById('login-step-2').classList.add('hidden');
+            document.getElementById('login-step-1').classList.remove('hidden');
+            document.getElementById('password').value = '';
+        }
+
+        function login() {
+            const u = document.getElementById('username').value, p = document.getElementById('password').value;
             const emps = DB.get('employees');
             const user = emps.find(x => x.id == u && x.pass == p);
             
@@ -1257,7 +1286,7 @@
                 
                 if(window.innerWidth <= 768) { document.getElementById('sidebar').classList.add('closed'); }
             } else {
-                alert("Invalid Login. Please check your Employee ID and Password.");
+                alert("Invalid Password. Please try again.");
             }
         }
         
@@ -1611,19 +1640,29 @@
         }
 
         function navigate(id) {
-            if(currentUser && currentUser.role !== 'admin') {
-                if(id === 'emp-leaves') {
-                    const decided = DB.get('leaveReqs').filter(r => r.empId === currentUser.id && r.status !== 'Pending').length;
-                    localStorage.setItem('seenLeaves_' + currentUser.id, decided);
+            if (currentUser) {
+                localStorage.setItem('lastSection', id);
+                
+                if (currentUser.role === 'admin') {
+                    if(id === 'admin-staff') localStorage.setItem('seen_admin-staff', DB.get('employees').length);
+                    if(id === 'admin-attendance') localStorage.setItem('seen_admin-attendance', DB.get('attendance').length);
+                    if(id === 'admin-donations') localStorage.setItem('seen_admin-donations', DB.get('donations').length);
+                    if(id === 'admin-leaves') localStorage.setItem('seen_admin-leaves', DB.get('leaveReqs').length);
+                    if(id === 'admin-resign') localStorage.setItem('seen_admin-resign', DB.get('resignReqs').length);
+                    if(id === 'admin-expenses') localStorage.setItem('seen_admin-expenses', DB.get('expenses').length);
+                    if(id === 'admin-tasks') localStorage.setItem('seen_admin-tasks', DB.get('tasks').length);
+                } else {
+                    if(id === 'emp-attendance') localStorage.setItem('seen_emp-attendance', DB.get('attendance').filter(a => a.id === currentUser.id).length);
+                    if(id === 'emp-tasks') localStorage.setItem('seen_emp-tasks', DB.get('tasks').filter(t => t.empId === currentUser.id).length);
+                    if(id === 'emp-donations') localStorage.setItem('seen_emp-donations', DB.get('donations').filter(d => d.empId === currentUser.id).length);
+                    if(id === 'emp-leaves') localStorage.setItem('seen_emp-leaves', DB.get('leaveReqs').filter(l => l.empId === currentUser.id).length);
+                    if(id === 'emp-expenses') localStorage.setItem('seen_emp-expenses', DB.get('expenses').filter(e => e.empId === currentUser.id).length);
+                    if(id === 'emp-resign') localStorage.setItem('seen_emp-resign', DB.get('resignReqs').filter(r => r.empId === currentUser.id).length);
+                    if(id === 'emp-dash') localStorage.setItem('seen_emp-dash', DB.get('ann') || '');
                 }
-                if(id === 'emp-expenses') {
-                    const decided = DB.get('expenses').filter(r => r.empId === currentUser.id && r.status !== 'Pending').length;
-                    localStorage.setItem('seenExps_' + currentUser.id, decided);
-                }
-                if(id === 'emp-dash') {
-                    const currentAnn = DB.get('ann') || '';
-                    localStorage.setItem('seenAnn_' + currentUser.id, currentAnn);
-                }
+                
+                document.getElementById('badge-' + id)?.classList.add('hidden');
+                document.getElementById('badge-' + id)?.classList.remove('new-update');
             }
 
             document.querySelectorAll('.section').forEach(s => s.classList.add('hidden'));
@@ -1640,10 +1679,6 @@
                     a.classList.add('active');
                 }
             });
-            
-            if(currentUser) {
-                localStorage.setItem('lastSection', id);
-            }
             
             if(window.innerWidth <= 768) { document.getElementById('sidebar').classList.add('closed'); }
             
@@ -2723,7 +2758,7 @@
                 if(timesDiv) {
                     timesDiv.classList.remove('hidden');
                     let lateWarning = r.isLate ? ` <span style="color:var(--danger); font-size:0.7rem; padding:2px 5px; background:#fee2e2; border-radius:4px; margin-left:5px;">LATE</span>` : '';
-                    let mapLink = r.inLoc ? `  |  <a href="http://googleusercontent.com/maps.google.com/?q=${r.inLoc}" target="_blank" style="color:var(--accent); text-decoration:none;"><i class="fa-solid fa-location-dot"></i> View Map</a>` : '';
+                    let mapLink = r.inLoc ? ` &nbsp;|&nbsp; <a href="https://maps.google.com/?q=${r.inLoc}" target="_blank" style="color:var(--accent); text-decoration:none;"><i class="fa-solid fa-location-dot"></i> View Map</a>` : '';
                     timesDiv.innerHTML = `<span style="color:var(--success);"><i class="fa-solid fa-play"></i> Started: ${r.in}</span>${lateWarning}${mapLink}`;
                 }
 
@@ -2745,9 +2780,9 @@
                 if(timesDiv) {
                     timesDiv.classList.remove('hidden');
                     let lateWarning = r.isLate ? ` <span style="color:var(--danger); font-size:0.7rem; padding:2px 5px; background:#fee2e2; border-radius:4px; margin-left:5px;">LATE</span>` : '';
-                    let inMap = r.inLoc ? ` <a href="http://googleusercontent.com/maps.google.com/?q=${r.inLoc}" target="_blank" style="color:var(--accent);"><i class="fa-solid fa-location-dot"></i></a>` : '';
-                    let outMap = r.outLoc ? ` <a href="http://googleusercontent.com/maps.google.com/?q=${r.outLoc}" target="_blank" style="color:var(--accent);"><i class="fa-solid fa-location-dot"></i></a>` : '';
-                    timesDiv.innerHTML = `<span style="color:var(--success);"><i class="fa-solid fa-play"></i> Started: ${r.in} ${inMap}</span>${lateWarning}  |  <span style="color:var(--danger);"><i class="fa-solid fa-stop"></i> Stopped: ${r.out} ${outMap}</span>`;
+                    let inMap = r.inLoc ? ` <a href="https://maps.google.com/?q=${r.inLoc}" target="_blank" style="color:var(--accent);"><i class="fa-solid fa-location-dot"></i></a>` : '';
+                    let outMap = r.outLoc ? ` <a href="https://maps.google.com/?q=${r.outLoc}" target="_blank" style="color:var(--accent);"><i class="fa-solid fa-location-dot"></i></a>` : '';
+                    timesDiv.innerHTML = `<span style="color:var(--success);"><i class="fa-solid fa-play"></i> Started: ${r.in} ${inMap}</span>${lateWarning} &nbsp;|&nbsp; <span style="color:var(--danger);"><i class="fa-solid fa-stop"></i> Stopped: ${r.out} ${outMap}</span>`;
                 }
 
                 if(timerDiv) {
