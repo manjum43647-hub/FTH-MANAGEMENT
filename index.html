@@ -1082,87 +1082,76 @@
             return html;
         }
 
-        let inMemoryData = null;
-        const IDB_NAME = "FeedTheHunger_UnlimitedDB";
+// ---------------------------------------------------------
+        // LIVE CLOUD DATABASE ENGINE (FIREBASE)
+        // ---------------------------------------------------------
+        
+        // Import the functions you need from the SDKs you need
+import { initializeApp } from "firebase/app";
+// TODO: Add SDKs for Firebase products that you want to use
+// https://firebase.google.com/docs/web/setup#available-libraries
+
+// Your web app's Firebase configuration
+const firebaseConfig = {
+  apiKey: "AIzaSyCwu91angQfuTURrsTpzzF77cxKC8Yi1oA",
+  authDomain: "feedthehunger-2f1fe.firebaseapp.com",
+  projectId: "feedthehunger-2f1fe",
+  storageBucket: "feedthehunger-2f1fe.firebasestorage.app",
+  messagingSenderId: "247915571230",
+  appId: "1:247915571230:web:655378e59cd945f4aae60f"
+};
+
+// Initialize Firebase
+const app = initializeApp(firebaseConfig);
+
+        // Initialize Cloud
+        firebase.initializeApp(firebaseConfig);
+        const cloudDB = firebase.firestore();
+
+        let inMemoryData = {};
 
         const DB = {
             get: (k) => {
-                if (inMemoryData && inMemoryData[k] !== undefined) return inMemoryData[k];
-                try { return JSON.parse(localStorage.getItem(k)) || []; } catch(e) { return []; }
+                return inMemoryData[k] || [];
             },
             set: (k, v) => {
-                if (!inMemoryData) inMemoryData = {};
                 inMemoryData[k] = v;
-                try { localStorage.setItem(k, JSON.stringify(v)); } catch (e) { console.log("Local 5MB full, using unlimited DB."); }
-                
-                if(window.indexedDB) {
-                    let req = indexedDB.open(IDB_NAME, 1);
-                    req.onsuccess = (e) => {
-                        let db = e.target.result;
-                        let tx = db.transaction("data", "readwrite");
-                        tx.objectStore("data").put(v, k);
-                    };
-                }
+                cloudDB.collection("erp_fth").doc(k).set({ 
+                    dataStr: JSON.stringify(v) 
+                }).catch(err => console.error("Cloud Sync Error:", err));
             },
             init: () => {
-                if(window.indexedDB) {
-                    let req = indexedDB.open(IDB_NAME, 1);
-                    req.onupgradeneeded = (e) => {
-                        let db = e.target.result;
-                        if (!db.objectStoreNames.contains("data")) db.createObjectStore("data");
-                    };
-                    req.onsuccess = (e) => {
-                        let db = e.target.result;
-                        let tx = db.transaction("data", "readonly");
-                        let store = tx.objectStore("data");
-                        let getReq = store.getAllKeys();
-                        let getVals = store.getAll();
-                        
-                        getReq.onsuccess = () => {
-                            getVals.onsuccess = () => {
-                                inMemoryData = {};
-                                for(let i=0; i<getReq.result.length; i++) {
-                                    inMemoryData[getReq.result[i]] = getVals.result[i];
-                                }
-                                
-                                if(Object.keys(inMemoryData).length === 0) {
-                                    const keys = ['employees', 'attendance', 'holidays', 'ann', 'leaveReqs', 'expenses', 'tasks', 'donations', 'config', 'personalNotes', 'resignReqs'];
-                                    keys.forEach(k => {
-                                        let lsData = localStorage.getItem(k);
-                                        if(lsData) { inMemoryData[k] = JSON.parse(lsData); DB.set(k, inMemoryData[k]); }
-                                    });
-                                    
-                                    if(!inMemoryData['employees'] || inMemoryData['employees'].length === 0) {
-                                        DB.set('employees', [{id:'Shiva@0334', name:'Super Admin', email: '', pass:'Shiva@0334', role:'admin', salary: 100000, pic: '', phone: '', createdAt: Date.now()}]);
-                                        DB.set('attendance', []); DB.set('holidays', []); DB.set('ann', ''); DB.set('leaveReqs', []);
-                                        DB.set('expenses', []); DB.set('tasks', []); DB.set('donations', []); DB.set('resignReqs', []);
-                                        DB.set('config', { 
-                                            empExpenses: true, empPayslip: true, annSound: true, maxPaidLeaves: 20, shiftTime: '09:30', latePenalty: 0, logo: '', tnc: '', resignTnc: 'Please serve a 30-day notice period. Ensure you hand over all company assets before leaving.',
-                                            loginBg: 'https://images.unsplash.com/photo-1548232979-6c557ee14752?q=80&w=1000&auto=format&fit=crop'
-                                        });
-                                        DB.set('personalNotes', {});
-                                    }
-                                }
-                                applyGlobalConfig(); 
-                            };
-                        };
-                    };
-                } else {
-                    if(!localStorage.getItem('employees')) {
+                cloudDB.collection("erp_fth").onSnapshot((snapshot) => {
+                    let isFirstLoad = Object.keys(inMemoryData).length === 0;
+
+                    snapshot.forEach((doc) => {
+                        inMemoryData[doc.id] = JSON.parse(doc.data().dataStr);
+                    });
+                    
+                    if (!inMemoryData['employees'] || inMemoryData['employees'].length === 0) {
                         DB.set('employees', [{id:'Shiva@0334', name:'Super Admin', email: '', pass:'Shiva@0334', role:'admin', salary: 100000, pic: '', phone: '', createdAt: Date.now()}]);
                         DB.set('attendance', []); DB.set('holidays', []); DB.set('ann', ''); DB.set('leaveReqs', []);
                         DB.set('expenses', []); DB.set('tasks', []); DB.set('donations', []); DB.set('resignReqs', []);
-                        DB.set('config', { 
-                            empExpenses: true, empPayslip: true, annSound: true, maxPaidLeaves: 20, shiftTime: '09:30', latePenalty: 0, logo: '', tnc: '', resignTnc: 'Please serve a 30-day notice period. Ensure you hand over all company assets before leaving.',
-                            loginBg: 'https://images.unsplash.com/photo-1548232979-6c557ee14752?q=80&w=1000&auto=format&fit=crop'
-                        });
+                        DB.set('config', { empExpenses: true, empPayslip: true, annSound: true, maxPaidLeaves: 20, shiftTime: '09:30', latePenalty: 0, logo: '', tnc: '', resignTnc: 'Please serve a 30-day notice period.', loginBg: 'https://images.unsplash.com/photo-1548232979-6c557ee14752?q=80&w=1000&auto=format&fit=crop' });
                         DB.set('personalNotes', {});
                     }
-                    applyGlobalConfig();
-                }
+
+                    if (isFirstLoad) {
+                        applyGlobalConfig();
+                    }
+
+                    if (currentUser) {
+                        updateBadges();
+                        if (currentUser.role === 'admin' && !document.getElementById('admin-dash').classList.contains('hidden')) loadAdminStats();
+                        if (currentUser.role !== 'admin' && !document.getElementById('emp-dash').classList.contains('hidden')) loadEmpStats();
+                        checkAnnPeriodic();
+                    }
+                });
             }
         };
+        
         DB.init();
+        // ---------------------------------------------------------
 
         function applyGlobalConfig() {
             let cfg = DB.get('config') || {};
