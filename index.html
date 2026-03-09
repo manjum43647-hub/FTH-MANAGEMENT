@@ -1099,11 +1099,9 @@ const firebaseConfig = {
 };
 
 // Initialize Firebase
-const app = initializeApp(firebaseConfig);
-
-        // Initialize Cloud
-        firebase.initializeApp(firebaseConfig);
-        const cloudDB = firebase.firestore();
+// CORRECT
+firebase.initializeApp(firebaseConfig);
+const cloudDB = firebase.firestore();
 
         let inMemoryData = {};
 
