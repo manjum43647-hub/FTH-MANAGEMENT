@@ -937,18 +937,51 @@
    </div> 
   </div> 
   <div id="toast-container"></div>
+
   <script>
+        // GLOBAL VARIABLES (Fixed errors here)
+        let camStream = null;
+        let clockActionType = '';
+        let currentLocation = null;
+        let inMemoryData = {};
+        
         let chartDaily, chartExpense, chartPayroll;
         let chartEmpGauge, chartEmpTask;
-        
         let chartAdminEmpGauge, chartAdminEmpTask; 
         let currentAdminViewEmpId = '';
         let currentAdminViewEmpName = '';
-
         let liveTimerInterval = null;
         let previousCounts = { leaves: -1, resigns: -1, expenses: -1, tasks: -1 };
         let currentUser = null;
         let lastAnnText = "";
+
+        // --- UPDATED MAP LINKS AND LOG ENTRY ---
+        function formatLogEntry(timeStr, imgStr, locStr) {
+            if(!timeStr) return '<span style="color:var(--warning); font-weight:bold;">Waiting...</span>';
+            
+            let html = `<div style="display:flex; align-items:center; gap:10px;">`;
+            
+            if(imgStr) {
+                html += `<div onclick="openImageViewer('${imgStr}')" title="Click to View Full Photo" style="cursor:pointer; flex-shrink:0;">
+                             <img src="${imgStr}" style="width:45px; height:45px; border-radius:6px; object-fit:cover; border:1px solid #cbd5e1; box-shadow:0 2px 4px rgba(0,0,0,0.1);">
+                         </div>`;
+            } else {
+                html += `<div style="width:45px; height:45px; border-radius:6px; background:#f1f5f9; display:flex; align-items:center; justify-content:center; border:1px dashed #cbd5e1; color:#94a3b8; font-size:0.7rem; flex-shrink:0;">No Pic</div>`;
+            }
+
+            html += `<div><div style="font-weight:bold; color:var(--primary); font-size:0.9rem;">${timeStr}</div>`;
+            
+            if(locStr && locStr.includes(',')) {
+                html += `<a href="https://www.google.com/maps?q=${locStr}" target="_blank" style="font-size:0.75rem; color:var(--success); text-decoration:none;"><i class="fa-solid fa-location-dot"></i> Open Map</a>`;
+            } else if(locStr) {
+                html += `<span style="font-size:0.7rem; color:#94a3b8;">(${locStr})</span>`;
+            } else {
+                html += `<span style="font-size:0.7rem; color:#94a3b8;">No GPS</span>`;
+            }
+            
+            html += `</div></div>`;
+            return html;
+        }
 
         function showToast(message, sectionId) {
             const container = document.getElementById('toast-container');
@@ -1071,43 +1104,7 @@
             document.getElementById('viewer-full-img').src = '';
         }
 
-        //function closeCameraModal() {
-            document.getElementById('camera-modal').classList.add('hidden');
-            if(camStream) { camStream.getTracks().forEach(track => track.stop()); camStream = null; }
-            if(document.getElementById('manual-photo-btn')) document.getElementById('manual-photo-btn').disabled = false;
-        
-
-        // --- UPDATED MAP LINKS AND LOG ENTRY ---
-        function formatLogEntry(timeStr, imgStr, locStr) {
-            if(!timeStr) return '<span style="color:var(--warning); font-weight:bold;">Waiting...</span>';
-            
-            let html = `<div style="display:flex; align-items:center; gap:10px;">`;
-            
-            if(imgStr) {
-                html += `<div onclick="openImageViewer('${imgStr}')" title="Click to View Full Photo" style="cursor:pointer; flex-shrink:0;">
-                             <img src="${imgStr}" style="width:45px; height:45px; border-radius:6px; object-fit:cover; border:1px solid #cbd5e1; box-shadow:0 2px 4px rgba(0,0,0,0.1);">
-                         </div>`;
-            } else {
-                html += `<div style="width:45px; height:45px; border-radius:6px; background:#f1f5f9; display:flex; align-items:center; justify-content:center; border:1px dashed #cbd5e1; color:#94a3b8; font-size:0.7rem; flex-shrink:0;">No Pic</div>`;
-            }
-
-            html += `<div><div style="font-weight:bold; color:var(--primary); font-size:0.9rem;">${timeStr}</div>`;
-            
-            if(locStr && locStr.includes(',')) {
-                // Fixed the Google Maps Link here
-                html += `<a href="https://www.google.com/maps?q=${locStr}" target="_blank" style="font-size:0.75rem; color:var(--success); text-decoration:none;"><i class="fa-solid fa-location-dot"></i> Open Map</a>`;
-            } else if(locStr) {
-                html += `<span style="font-size:0.7rem; color:#94a3b8;">(${locStr})</span>`;
-            } else {
-                html += `<span style="font-size:0.7rem; color:#94a3b8;">No GPS</span>`;
-            }
-            
-            html += `</div></div>`;
-            return html;
-        }
-
         // ---------------------------------------------------------
-        // LIVE CLOUD DATABASE ENGINE (FIREBASE) ---------------------------------------------------------
         // LIVE CLOUD DATABASE ENGINE (FIREBASE)
         // ---------------------------------------------------------
         const firebaseConfig = {
@@ -1121,8 +1118,6 @@
 
         firebase.initializeApp(firebaseConfig);
         const cloudDB = firebase.firestore();
-
-        let inMemoryData = {};
 
         const DB = {
             get: (k) => {
@@ -1194,7 +1189,6 @@
             const u = document.getElementById('username').value, p = document.getElementById('password').value;
             const btn = document.getElementById('login-btn');
             
-            // Auto Buffering: Wait silently if cloud hasn't downloaded yet
             if(Object.keys(inMemoryData).length === 0 || !inMemoryData['employees']) {
                 btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Syncing...';
                 btn.disabled = true;
@@ -1275,7 +1269,6 @@
             if(!tempOtpUser) return alert("Phone number not found in our records! Please contact the Admin.");
             
             tempOtp = Math.floor(1000 + Math.random() * 9000).toString();
-            // Simulating SMS send since we don't have a backend messaging service integrated
             alert("Verification OTP sent to " + phone + ".\n\n(Simulated SMS) Your OTP is: " + tempOtp);
             
             document.getElementById('fp-step-1').classList.add('hidden');
@@ -1297,18 +1290,21 @@
             }
         }
 
-        let currentLocation = null;
-
         function startClockAction(action) {
             clockActionType = action;
             currentLocation = null;
             document.getElementById('camera-modal').classList.remove('hidden');
             document.getElementById('camera-title').innerText = action === 'in' ? 'Start Shift Verification' : 'Stop Shift Verification';
             
-            document.getElementById('camera-status').innerText = "Acquiring High-Accuracy GPS Lock...";
+            document.getElementById('camera-status').innerText = "Acquiring High-Accuracy GPS Lock (Please wait)...";
             document.getElementById('cam-capture-btn').disabled = true;
             if(document.getElementById('manual-photo-btn')) document.getElementById('manual-photo-btn').disabled = true;
             document.getElementById('cam-video').style.display = 'none';
+
+            if (!navigator.geolocation) {
+                document.getElementById('camera-status').innerText = "Location services are not supported by this browser.";
+                return;
+            }
 
             // Require location BEFORE allowing photo capture
             navigator.geolocation.getCurrentPosition(pos => {
@@ -1316,10 +1312,16 @@
                 document.getElementById('camera-status').innerText = "Location Verified! Opening Camera...";
                 initCamera();
             }, err => {
-                document.getElementById('camera-status').innerText = "Location required! Please allow GPS access to clock in.";
+                let errMsg = "Location required! Please allow GPS access to clock in.";
+                if(err.code === 1) errMsg = "Permission Denied! Click the lock icon in your URL bar and 'Allow' Location.";
+                if(err.code === 2) errMsg = "GPS is OFF! Please turn on Location in your phone's main settings.";
+                if(err.code === 3) errMsg = "GPS Signal Timeout! Please step outside or check your internet connection.";
+                
+                document.getElementById('camera-status').innerText = errMsg;
+                document.getElementById('camera-status').style.color = "var(--danger)";
                 document.getElementById('cam-capture-btn').classList.add('hidden');
                 if(document.getElementById('manual-photo-btn')) document.getElementById('manual-photo-btn').classList.add('hidden');
-            }, { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 });
+            }, { enableHighAccuracy: true, timeout: 15000, maximumAge: 0 }); 
         }
 
         function initCamera() {
@@ -1328,17 +1330,15 @@
             document.getElementById('cam-capture-btn').classList.remove('hidden');
             
             if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
-                // Requesting front-facing camera specifically for selfies
                 navigator.mediaDevices.getUserMedia({ video: { facingMode: "user" } })
                     .then(stream => {
                         camStream = stream;
                         let video = document.getElementById('cam-video');
                         video.srcObject = stream;
-                        
-                        // Wait for video to properly load dimensions before enabling the button
                         video.onloadedmetadata = () => {
                             video.play();
                             document.getElementById('camera-status').innerText = "GPS & Camera Active. Ready to capture.";
+                            document.getElementById('camera-status').style.color = "var(--success)";
                             document.getElementById('cam-capture-btn').disabled = false;
                         };
                     })
@@ -1363,28 +1363,24 @@
             let width = video.videoWidth; 
             let height = video.videoHeight;
             
-            // Failsafe: if video hasn't rendered yet, wait!
             if (width === 0 || height === 0) {
                 alert("Camera is warming up... Please try again in a second.");
                 return;
             }
             
-            // Compress the image to ensure it fits safely in the Firebase Database
-            const MAX_WIDTH = 400; 
+            const MAX_WIDTH = 800; 
             if (width > MAX_WIDTH) { height = Math.round((height * MAX_WIDTH) / width); width = MAX_WIDTH; }
             
             canvas.width = width;
             canvas.height = height;
             canvas.getContext('2d').drawImage(video, 0, 0, width, height);
             
-            // Show loading text on button
             document.getElementById('cam-capture-btn').innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Saving...';
             document.getElementById('cam-capture-btn').disabled = true;
             
-            const imgData = canvas.toDataURL('image/jpeg', 0.6); 
+            const imgData = canvas.toDataURL('image/jpeg', 0.8); 
             finalizeClockAction(imgData, currentLocation);
             
-            // Reset button text for next time
             setTimeout(() => {
                 document.getElementById('cam-capture-btn').innerHTML = '<i class="fa-solid fa-camera"></i> Capture Photo';
             }, 1000);
@@ -1421,6 +1417,12 @@
             closeCameraModal();
             if(clockActionType === 'in') { executeClockIn(imgData, loc); } 
             else { executeClockOut(imgData, loc); }
+        }
+
+        function closeCameraModal() {
+            document.getElementById('camera-modal').classList.add('hidden');
+            if(camStream) { camStream.getTracks().forEach(track => track.stop()); camStream = null; }
+            if(document.getElementById('manual-photo-btn')) document.getElementById('manual-photo-btn').disabled = false;
         }
 
         function applyGlobalConfig() {
@@ -1597,21 +1599,16 @@
             if(id === 'admin-expenses') document.getElementById('badge-admin-expenses')?.classList.remove('new-update');
             if(id === 'emp-tasks') document.getElementById('badge-emp-tasks')?.classList.remove('new-update');
             
-            // --- BULLETPROOF HIGHLIGHT LOGIC ---
             let highlightId = id;
-            // If viewing a specific profile, keep the Staff Directory tab highlighted
             if(id === 'admin-employee-profile') highlightId = 'admin-staff';
 
             document.querySelectorAll('.sidebar a').forEach(a => {
                 a.classList.remove('active');
                 let onClickAttr = a.getAttribute('onclick');
-                
-                // We just check if the ID text exists ANYWHERE in the onclick attribute, ignoring quotes!
                 if(onClickAttr && onClickAttr.includes(highlightId)) {
                     a.classList.add('active');
                 }
             });
-            // -----------------------------------
             
             if(currentUser) {
                 localStorage.setItem('lastSection', id);
@@ -1650,6 +1647,7 @@
             if(document.getElementById('report-canvas')) document.getElementById('report-canvas').style.display = 'none';
             if(document.getElementById('resign-pdf-canvas')) document.getElementById('resign-pdf-canvas').style.display = 'none';
         }
+
         function toggleSidebar() { document.getElementById('sidebar').classList.toggle('closed'); }
 
         function applyConfigToSidebar() {
@@ -2484,8 +2482,6 @@
             document.getElementById('attendance-modal').classList.remove('hidden');
         }
 
-        function closeAttendanceModal() { document.getElementById('attendance-modal').classList.add('hidden'); }
-
         function editStaff(id) {
             let emps = DB.get('employees'); let idx = emps.findIndex(x => x.id === id);
             if(idx > -1) {
@@ -2676,7 +2672,7 @@
             if(r) { r.out = formatTimeAMPM(); r.outImg = img; r.outLoc = loc; r.endTimestamp = Date.now(); DB.set('attendance', att); checkClock(); } 
         }
         
-       function checkClock() { 
+        function checkClock() { 
             const r = DB.get('attendance').find(x => x.id === currentUser.id && x.date === new Date().toLocaleDateString()); 
             const btnIn = document.getElementById('btn-in'), btnOut = document.getElementById('btn-out'), timerDiv = document.getElementById('live-timer'), timesDiv = document.getElementById('log-times-display');
             clearInterval(liveTimerInterval); 
@@ -2694,7 +2690,7 @@
                 if(timesDiv) {
                     timesDiv.classList.remove('hidden');
                     let lateWarning = r.isLate ? ` <span style="color:var(--danger); font-size:0.7rem; padding:2px 5px; background:#fee2e2; border-radius:4px; margin-left:5px;">LATE</span>` : '';
-                    let mapLink = r.inLoc ? ` | <a href="https://maps.google.com/?q=${r.inLoc}" target="_blank" style="color:var(--accent); text-decoration:none;"><i class="fa-solid fa-location-dot"></i> View Map</a>` : '';
+                    let mapLink = r.inLoc ? ` &nbsp;|&nbsp; <a href="https://www.google.com/maps?q=${r.inLoc}" target="_blank" style="color:var(--accent); text-decoration:none;"><i class="fa-solid fa-location-dot"></i> View Map</a>` : '';
                     timesDiv.innerHTML = `<span style="color:var(--success);"><i class="fa-solid fa-play"></i> Started: ${r.in}</span>${lateWarning}${mapLink}`;
                 }
 
@@ -2716,9 +2712,9 @@
                 if(timesDiv) {
                     timesDiv.classList.remove('hidden');
                     let lateWarning = r.isLate ? ` <span style="color:var(--danger); font-size:0.7rem; padding:2px 5px; background:#fee2e2; border-radius:4px; margin-left:5px;">LATE</span>` : '';
-                    let inMap = r.inLoc ? ` <a href="https://maps.google.com/?q=${r.inLoc}" target="_blank" style="color:var(--accent);"><i class="fa-solid fa-location-dot"></i></a>` : '';
-                    let outMap = r.outLoc ? ` <a href="https://maps.google.com/?q=${r.outLoc}" target="_blank" style="color:var(--accent);"><i class="fa-solid fa-location-dot"></i></a>` : '';
-                    timesDiv.innerHTML = `<span style="color:var(--success);"><i class="fa-solid fa-play"></i> Started: ${r.in}${inMap}</span>${lateWarning} &nbsp;|&nbsp; <span style="color:var(--danger);"><i class="fa-solid fa-stop"></i> Stopped: ${r.out}${outMap}</span>`;
+                    let inMap = r.inLoc ? ` <a href="https://www.google.com/maps?q=${r.inLoc}" target="_blank" style="color:var(--accent);"><i class="fa-solid fa-location-dot"></i></a>` : '';
+                    let outMap = r.outLoc ? ` <a href="https://www.google.com/maps?q=${r.outLoc}" target="_blank" style="color:var(--accent);"><i class="fa-solid fa-location-dot"></i></a>` : '';
+                    timesDiv.innerHTML = `<span style="color:var(--success);"><i class="fa-solid fa-play"></i> Started: ${r.in} ${inMap}</span>${lateWarning} &nbsp;|&nbsp; <span style="color:var(--danger);"><i class="fa-solid fa-stop"></i> Stopped: ${r.out} ${outMap}</span>`;
                 }
 
                 if(timerDiv) {
