@@ -831,6 +831,7 @@
     </div> 
    </div> 
   </div> 
+  <div id="toast-container"></div>
   <script>
         let chartDaily, chartExpense, chartPayroll;
         let chartEmpGauge, chartEmpTask;
@@ -840,7 +841,36 @@
         let currentAdminViewEmpName = '';
 
         let liveTimerInterval = null;
+// Tracking old counts so we know when a NEW one arrives
+        let previousCounts = { leaves: -1, resigns: -1, expenses: -1, tasks: -1 };
 
+        function showToast(message, sectionId) {
+            const container = document.getElementById('toast-container');
+            if(!container) return;
+            
+            const toast = document.createElement('div');
+            toast.className = 'toast';
+            toast.innerHTML = `<i class="fa-solid fa-bell" style="color:#fef08a; font-size: 1.2rem;"></i> <span>${message}</span>`;
+            
+            // If they click the pop-up, navigate to that page instantly
+            toast.onclick = () => {
+                navigate(sectionId);
+                toast.style.opacity = '0';
+                setTimeout(() => toast.remove(), 300);
+            };
+
+            container.appendChild(toast);
+            
+            // Play a ping sound if the admin has sounds turned on!
+            let cfg = DB.get('config') || {};
+            if(cfg.annSound) playAnnSound(); 
+            
+            // Auto-hide after 6 seconds
+            setTimeout(() => {
+                toast.style.opacity = '0';
+                setTimeout(() => toast.remove(), 300);
+            }, 6000);
+        }
         let homeClickTimer = null;
         function handleHomeClick() {
             if(homeClickTimer) {
@@ -877,16 +907,42 @@
 
         function updateBadges() {
             if(!currentUser) return;
+            
             if(currentUser.role === 'admin') {
                 const lReqs = DB.get('leaveReqs').filter(r => r.status === 'Pending').length;
                 const rReqs = DB.get('resignReqs').filter(r => r.status === 'Pending').length;
                 const eReqs = DB.get('expenses').filter(r => r.status === 'Pending').length;
+
+                // Check for new updates
+                if(previousCounts.leaves !== -1 && lReqs > previousCounts.leaves) { 
+                    showToast("New Leave Request Pending!", 'admin-leaves'); 
+                    document.getElementById('badge-admin-leaves').classList.add('new-update'); 
+                }
+                if(previousCounts.resigns !== -1 && rReqs > previousCounts.resigns) { 
+                    showToast("New Resignation Submitted!", 'admin-resign'); 
+                    document.getElementById('badge-admin-resign').classList.add('new-update'); 
+                }
+                if(previousCounts.expenses !== -1 && eReqs > previousCounts.expenses) { 
+                    showToast("New Expense Claim Submitted!", 'admin-expenses'); 
+                    document.getElementById('badge-admin-expenses').classList.add('new-update'); 
+                }
+
+                previousCounts.leaves = lReqs;
+                previousCounts.resigns = rReqs;
+                previousCounts.expenses = eReqs;
 
                 toggleBadge('badge-admin-leaves', lReqs);
                 toggleBadge('badge-admin-resign', rReqs);
                 toggleBadge('badge-admin-expenses', eReqs);
             } else {
                 const tasks = DB.get('tasks').filter(t => t.empId === currentUser.id && t.status !== 'Completed').length;
+                
+                if(previousCounts.tasks !== -1 && tasks > previousCounts.tasks) { 
+                    showToast("You have a new task assigned!", 'emp-tasks'); 
+                    document.getElementById('badge-emp-tasks').classList.add('new-update'); 
+                }
+                
+                previousCounts.tasks = tasks;
                 toggleBadge('badge-emp-tasks', tasks);
             }
         }
@@ -1364,7 +1420,11 @@ const cloudDB = firebase.firestore();
             document.querySelectorAll('.section').forEach(s => s.classList.add('hidden'));
             document.getElementById(id).classList.remove('hidden');
             document.getElementById('page-title').innerText = id.replace('-', ' ').toUpperCase();
-            
+            // Remove pulsing animation when they view the section
+            if(id === 'admin-leaves') document.getElementById('badge-admin-leaves')?.classList.remove('new-update');
+            if(id === 'admin-resign') document.getElementById('badge-admin-resign')?.classList.remove('new-update');
+            if(id === 'admin-expenses') document.getElementById('badge-admin-expenses')?.classList.remove('new-update');
+            if(id === 'emp-tasks') document.getElementById('badge-emp-tasks')?.classList.remove('new-update');
             // Set active class on sidebar
             document.querySelectorAll('.sidebar a').forEach(a => {
                 a.classList.remove('active');
