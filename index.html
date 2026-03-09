@@ -1276,13 +1276,20 @@ const app = initializeApp(firebaseConfig);
 
         function login() {
             const u = document.getElementById('username').value, p = document.getElementById('password').value;
-            const user = DB.get('employees').find(x => x.id == u && x.pass == p);
+            const emps = DB.get('employees');
+            
+            // NEW CHECK: Is the cloud still downloading?
+            if(emps.length === 0) {
+                alert("Connecting to Cloud Database... Please wait a moment and click Log In again.");
+                return;
+            }
+
+            const user = emps.find(x => x.id == u && x.pass == p);
             
             if(user) {
                 if(user.role !== 'admin') {
                     if(!user.createdAt) {
                         user.createdAt = Date.now();
-                        let emps = DB.get('employees');
                         let idx = emps.findIndex(e => e.id === user.id);
                         if(idx > -1) { emps[idx].createdAt = user.createdAt; DB.set('employees', emps); }
                     }
@@ -1310,9 +1317,8 @@ const app = initializeApp(firebaseConfig);
                 if(document.getElementById('emp-slip-month')) document.getElementById('emp-slip-month').value = currMonth;
                 
                 if(window.innerWidth <= 768) { document.getElementById('sidebar').classList.add('closed'); }
-            } else alert("Invalid Login");
+            } else alert("Invalid Login. Please check your Employee ID and Password.");
         }
-
         function updateProfileCardUI() {
             if(document.getElementById('my-profile-name')) {
                 document.getElementById('my-profile-name').innerText = "Welcome, " + currentUser.name;
