@@ -29,7 +29,7 @@
         .sidebar a { padding: 15px 25px; text-decoration: none; color: #94a3b8; display: flex; align-items: center; cursor: pointer; transition: background 0.2s, color 0.2s; position: relative;}
         .sidebar a i { margin-right: 15px; width: 20px; text-align: center; color: #94a3b8; transition: color 0.2s; }
         
-        .nav-badge { background: var(--danger); color: white; border-radius: 12px; padding: 2px 8px; font-size: 0.7rem; font-weight: bold; margin-left: auto; line-height: 1; display: inline-flex; align-items: center; justify-content: center; }
+        .nav-badge { background: var(--danger); color: white; border-radius: 12px; font-weight: bold; line-height: 1; display: inline-flex; align-items: center; justify-content: center; }
 
         /* Make Icons White on Hover & Active */
         .sidebar a:hover, .sidebar a.active { background: rgba(255,255,255,0.1); color: white; border-left: 4px solid var(--accent); }
@@ -37,7 +37,8 @@
 
         .main-content { flex: 1; padding: 20px; overflow-y: auto; scroll-behavior: smooth;}
         .top-nav { display: flex; align-items: center; background: white; padding: 12px 25px; border-radius: 10px; margin-bottom: 20px; box-shadow: 0 2px 4px rgba(0,0,0,0.05); }
-        .menu-toggle { font-size: 1.5rem; cursor: pointer; color: var(--primary); margin-right: 20px; }
+        .menu-toggle { font-size: 1.5rem; cursor: pointer; color: var(--primary); transition: 0.2s; }
+        .menu-toggle:hover { color: var(--accent); }
 
         .card { background: white; padding: 20px; border-radius: 12px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1); margin-bottom: 20px; }
         .grid-stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 20px; }
@@ -143,10 +144,10 @@
         /* --- PULSING BADGE ANIMATION --- */
         @keyframes pulse-badge { 
             0% { transform: scale(1); box-shadow: 0 0 0 0 rgba(225, 29, 72, 0.7); } 
-            70% { transform: scale(1.3); box-shadow: 0 0 0 6px rgba(225, 29, 72, 0); } 
+            70% { transform: scale(1.1); box-shadow: 0 0 0 6px rgba(225, 29, 72, 0); } 
             100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(225, 29, 72, 0); } 
         }
-        .nav-badge.new-update { animation: pulse-badge 1.5s infinite; background: #be123c; }
+        .new-update { animation: pulse-badge 1.5s infinite !important; background: #be123c !important; }
     </style>
  </head> 
  <body> 
@@ -214,8 +215,8 @@
      <thead> 
       <tr> 
        <th>Date</th> 
-       <th>Start Photo &amp; Time</th> 
-       <th>Stop Photo &amp; Time</th> 
+       <th>Start Photo & Time</th> 
+       <th>Stop Photo & Time</th> 
        <th>Total Time</th> 
        <th>Daily Notes</th> 
       </tr> 
@@ -234,32 +235,44 @@
        <a onclick="navigate('admin-staff')"><i class="fa-solid fa-users-gear"></i> Staff Directory</a> 
        <a onclick="navigate('admin-attendance')"><i class="fa-solid fa-user-clock"></i> Attendance Logs</a> 
        <a onclick="navigate('admin-donations')"><i class="fa-solid fa-hand-holding-heart"></i> Donation Logs</a> 
-       <a onclick="navigate('admin-leaves')"><i class="fa-solid fa-envelope-open-text"></i> Leave Requests <span id="badge-admin-leaves" class="nav-badge hidden">0</span></a> 
-       <a onclick="navigate('admin-resign')"><i class="fa-solid fa-user-slash"></i> Resignations <span id="badge-admin-resign" class="nav-badge hidden">0</span></a> 
+       
+       <a onclick="navigate('admin-leaves')"><div style="position:relative; margin-right:15px; width:20px; display:flex; justify-content:center;"><i class="fa-solid fa-envelope-open-text" style="margin-right:0;"></i><span id="badge-admin-leaves" class="nav-badge hidden" style="position:absolute; top:-8px; right:-15px; padding:2px 4px; font-size:0.6rem; border:2px solid var(--primary);">0</span></div> Leave Requests</a> 
+       <a onclick="navigate('admin-resign')"><div style="position:relative; margin-right:15px; width:20px; display:flex; justify-content:center;"><i class="fa-solid fa-user-slash" style="margin-right:0;"></i><span id="badge-admin-resign" class="nav-badge hidden" style="position:absolute; top:-8px; right:-15px; padding:2px 4px; font-size:0.6rem; border:2px solid var(--primary);">0</span></div> Resignations</a> 
+       
        <a onclick="navigate('admin-salary')"><i class="fa-solid fa-indian-rupee-sign"></i> Payroll</a> 
-       <a onclick="navigate('admin-expenses')"><i class="fa-solid fa-file-invoice-dollar"></i> Expense Claims <span id="badge-admin-expenses" class="nav-badge hidden">0</span></a> 
+       
+       <a onclick="navigate('admin-expenses')"><div style="position:relative; margin-right:15px; width:20px; display:flex; justify-content:center;"><i class="fa-solid fa-file-invoice-dollar" style="margin-right:0;"></i><span id="badge-admin-expenses" class="nav-badge hidden" style="position:absolute; top:-8px; right:-15px; padding:2px 4px; font-size:0.6rem; border:2px solid var(--primary);">0</span></div> Expense Claims</a> 
+       
        <a onclick="navigate('admin-tasks')"><i class="fa-solid fa-list-check"></i> Assign Tasks</a> 
        <a onclick="navigate('admin-id')"><i class="fa-solid fa-id-card"></i> ID Studio</a> 
        <a onclick="navigate('admin-holidays')"><i class="fa-solid fa-calendar-check"></i> Holidays</a> 
        <a onclick="navigate('admin-reports')"><i class="fa-solid fa-file-pdf"></i> Monthly Reports</a> 
-       <a onclick="navigate('sys-options')"><i class="fa-solid fa-sliders"></i> Settings &amp; Options</a> 
+       <a onclick="navigate('sys-options')"><i class="fa-solid fa-sliders"></i> Settings & Options</a> 
    </div> 
    <div id="emp-links" class="hidden"> 
-       <a onclick="navigate('emp-dash')"><i class="fa-solid fa-house"></i> Workspace</a> 
+       <a onclick="navigate('emp-dash')"><div style="position:relative; margin-right:15px; width:20px; display:flex; justify-content:center;"><i class="fa-solid fa-house" style="margin-right:0;"></i><span id="badge-emp-dash" class="nav-badge hidden" style="position:absolute; top:-8px; right:-10px; padding:2px 5px; font-size:0.6rem; border:2px solid var(--primary);">!</span></div> Workspace</a> 
        <a onclick="navigate('emp-attendance')"><i class="fa-solid fa-clock-rotate-left"></i> My Attendance</a> 
-       <a onclick="navigate('emp-tasks')"><i class="fa-solid fa-thumbtack"></i> My Tasks <span id="badge-emp-tasks" class="nav-badge hidden">0</span></a> 
+       
+       <a onclick="navigate('emp-tasks')"><div style="position:relative; margin-right:15px; width:20px; display:flex; justify-content:center;"><i class="fa-solid fa-thumbtack" style="margin-right:0;"></i><span id="badge-emp-tasks" class="nav-badge hidden" style="position:absolute; top:-8px; right:-15px; padding:2px 4px; font-size:0.6rem; border:2px solid var(--primary);">0</span></div> My Tasks</a> 
+       
        <a onclick="navigate('emp-donations')"><i class="fa-solid fa-hand-holding-heart"></i> Donation Tracker</a> 
-       <a onclick="navigate('emp-leaves')"><i class="fa-solid fa-calendar-minus"></i> Apply Leave</a> 
-       <a id="link-emp-expenses" onclick="navigate('emp-expenses')"><i class="fa-solid fa-hand-holding-dollar"></i> My Expenses</a> 
+       
+       <a onclick="navigate('emp-leaves')"><div style="position:relative; margin-right:15px; width:20px; display:flex; justify-content:center;"><i class="fa-solid fa-calendar-minus" style="margin-right:0;"></i><span id="badge-emp-leaves" class="nav-badge hidden" style="position:absolute; top:-8px; right:-15px; padding:2px 4px; font-size:0.6rem; border:2px solid var(--primary);">0</span></div> Apply Leave</a> 
+       
+       <a id="link-emp-expenses" onclick="navigate('emp-expenses')"><div style="position:relative; margin-right:15px; width:20px; display:flex; justify-content:center;"><i class="fa-solid fa-hand-holding-dollar" style="margin-right:0;"></i><span id="badge-emp-expenses" class="nav-badge hidden" style="position:absolute; top:-8px; right:-15px; padding:2px 4px; font-size:0.6rem; border:2px solid var(--primary);">0</span></div> My Expenses</a> 
+       
        <a id="link-emp-slip" onclick="navigate('emp-slip')"><i class="fa-solid fa-receipt"></i> My Payslips</a> 
        <a onclick="navigate('emp-resign')"><i class="fa-solid fa-user-slash"></i> Resignation</a> 
-       <a onclick="navigate('sys-options')"><i class="fa-solid fa-sliders"></i> Settings &amp; Options</a> 
+       <a onclick="navigate('sys-options')"><i class="fa-solid fa-sliders"></i> Settings & Options</a> 
    </div> 
   </div> 
   
   <div class="main-content"> 
    <div class="top-nav no-print"> 
-       <i class="fa-solid fa-bars menu-toggle" onclick="toggleSidebar()"></i> 
+       <div style="position:relative; margin-right: 20px; cursor: pointer; display:flex; align-items:center;" onclick="toggleSidebar()">
+           <i class="fa-solid fa-bars menu-toggle" style="margin-right:0;"></i>
+           <span id="global-menu-badge" class="hidden" style="position:absolute; top:-4px; right:-8px; width:12px; height:12px; background:var(--danger); border-radius:50%; animation: pulse-badge 1.5s infinite; border: 2px solid white;"></span>
+       </div>
        <h3 id="page-title" style="color:var(--primary); text-transform:uppercase;">DASHBOARD</h3> 
        <div style="margin-left:auto; display:flex; align-items:center; gap:10px;">
            <button class="btn btn-primary" onclick="goHome()">HOME</button> 
@@ -320,7 +333,7 @@
      </div> 
     </div> 
     <div class="card no-print" style="margin-bottom: 20px; border-left: 5px solid var(--accent);"> 
-     <h3>System Security &amp; Backup</h3> 
+     <h3>System Security & Backup</h3> 
      <p style="font-size:0.85rem; color:#64748b; margin-bottom:15px;">Download a complete backup of your entire ERP (Staff, Attendance, Tasks, etc.) or restore from a previous backup file.</p> 
      <div style="display:flex; flex-wrap: wrap; gap:10px;"> <button class="btn btn-primary" onclick="backupDatabase()"><i class="fa-solid fa-download"></i> Backup Database</button> <label class="btn btn-warning" style="cursor:pointer; margin:0; display:inline-flex; align-items:center; gap:8px;"> <i class="fa-solid fa-upload"></i> Restore Database <input type="file" accept=".json" style="display:none;" onchange="restoreDatabase(event)"> </label> <button class="btn btn-danger" onclick="wipeSystemData()"><i class="fa-solid fa-skull"></i> Wipe All Data</button> 
      </div> 
@@ -336,7 +349,7 @@
    
    <div id="sys-options" class="section hidden"> 
     <div id="admin-feature-toggles" class="card hidden no-print" style="border-left: 5px solid var(--danger);"> 
-     <h3>Admin Controls: Master Settings &amp; Branding</h3> 
+     <h3>Admin Controls: Master Settings & Branding</h3> 
      <p style="color:#64748b; font-size:0.85rem; margin-bottom:15px;">Control features, branding, and policies for all staff members.</p> 
      <div class="grid-stats"> 
       <div style="border: 1px solid #e2e8f0; padding: 15px; border-radius: 8px; grid-column: 1 / -1;"> 
@@ -348,15 +361,15 @@
       </div> 
       <div style="border: 1px solid #e2e8f0; padding: 15px; border-radius: 8px; grid-column: 1 / -1;"> 
        <h4><i class="fa-solid fa-palette" style="color:var(--accent);"></i> Login Page Background</h4> 
-       <p style="font-size:0.75rem; color:#64748b; margin-bottom:10px;">Select a trending background theme for the login page.</p> <select id="toggle-bg-image" style="width:100%; margin-bottom:0;"> <option value="https://images.unsplash.com/photo-1548232979-6c557ee14752?q=80&amp;w=1000&amp;auto=format&amp;fit=crop">Theme 1: Winter Landscape (Default)</option> <option value="https://images.unsplash.com/photo-1557682250-33bd709cbe85?q=80&amp;w=1000&amp;auto=format&amp;fit=crop">Theme 2: Purple Abstract Gradient</option> <option value="https://images.unsplash.com/photo-1555680202-c86f0e12f086?q=80&amp;w=1000&amp;auto=format&amp;fit=crop">Theme 3: Cyberpunk / Neon City</option> <option value="https://images.unsplash.com/photo-1448375240586-882707db888b?q=80&amp;w=1000&amp;auto=format&amp;fit=crop">Theme 4: Deep Nature / Forest</option> <option value="https://images.unsplash.com/photo-1534447677768-be436bb09401?q=80&amp;w=1000&amp;auto=format&amp;fit=crop">Theme 5: Space / Galaxy</option> <option value="https://images.unsplash.com/photo-1497366216548-37526070297c?q=80&amp;w=1000&amp;auto=format&amp;fit=crop">Theme 6: Modern Corporate Desk</option> </select> 
+       <p style="font-size:0.75rem; color:#64748b; margin-bottom:10px;">Select a trending background theme for the login page.</p> <select id="toggle-bg-image" style="width:100%; margin-bottom:0;"> <option value="https://images.unsplash.com/photo-1548232979-6c557ee14752?q=80&w=1000&auto=format&fit=crop">Theme 1: Winter Landscape (Default)</option> <option value="https://images.unsplash.com/photo-1557682250-33bd709cbe85?q=80&w=1000&auto=format&fit=crop">Theme 2: Purple Abstract Gradient</option> <option value="https://images.unsplash.com/photo-1555680202-c86f0e12f086?q=80&w=1000&auto=format&fit=crop">Theme 3: Cyberpunk / Neon City</option> <option value="https://images.unsplash.com/photo-1448375240586-882707db888b?q=80&w=1000&auto=format&fit=crop">Theme 4: Deep Nature / Forest</option> <option value="https://images.unsplash.com/photo-1534447677768-be436bb09401?q=80&w=1000&auto=format&fit=crop">Theme 5: Space / Galaxy</option> <option value="https://images.unsplash.com/photo-1497366216548-37526070297c?q=80&w=1000&auto=format&fit=crop">Theme 6: Modern Corporate Desk</option> </select> 
       </div> 
       <div style="border: 1px solid #e2e8f0; padding: 15px; border-radius: 8px; grid-column: 1 / -1;"> 
-       <h4><i class="fa-solid fa-file-contract" style="color:var(--accent);"></i> Terms &amp; Conditions (Login Screen)</h4> 
+       <h4><i class="fa-solid fa-file-contract" style="color:var(--accent);"></i> Terms & Conditions (Login Screen)</h4> 
        <p style="font-size:0.75rem; color:#64748b; margin-bottom:10px;">This text will appear at the bottom of the login screen.</p> <textarea id="admin-tnc-input" rows="3" style="width:100%; margin-bottom:0;" placeholder="Enter Terms and Conditions..."></textarea> 
       </div> 
       <div style="border: 1px solid #e2e8f0; padding: 15px; border-radius: 8px; grid-column: 1 / -1;"> 
-       <h4><i class="fa-solid fa-file-signature" style="color:var(--accent);"></i> Resignation T&amp;C</h4> 
-       <p style="font-size:0.75rem; color:#64748b; margin-bottom:10px;">Terms and conditions shown to staff when applying for resignation.</p> <textarea id="admin-resign-tnc" rows="3" style="width:100%; margin-bottom:0;" placeholder="Enter Resignation Terms &amp; Conditions..."></textarea> 
+       <h4><i class="fa-solid fa-file-signature" style="color:var(--accent);"></i> Resignation T&C</h4> 
+       <p style="font-size:0.75rem; color:#64748b; margin-bottom:10px;">Terms and conditions shown to staff when applying for resignation.</p> <textarea id="admin-resign-tnc" rows="3" style="width:100%; margin-bottom:0;" placeholder="Enter Resignation Terms & Conditions..."></textarea> 
       </div> 
       <div style="border: 1px solid #e2e8f0; padding: 15px; border-radius: 8px;"> <label style="display:flex; align-items:center; gap:10px; cursor:pointer; font-weight:bold;"> <input type="checkbox" id="toggle-expenses" style="width:auto; margin:0;"> Enable Employee Expenses </label> 
       </div> 
@@ -370,7 +383,7 @@
       </div> 
       <div style="border: 1px solid #e2e8f0; padding: 15px; border-radius: 8px;"> <label style="display:flex; flex-direction:column; gap:5px; font-weight:bold; font-size:0.9rem;"> Late Penalty Deduction (₹ per day): <input type="number" id="toggle-late-penalty" style="margin:0; padding:8px;" min="0"> </label> 
       </div> 
-     </div> <button class="btn btn-success" style="width: 100%; margin-top: 20px; padding: 15px; font-size: 1.1rem; box-shadow: 0 4px 6px rgba(0,0,0,0.1);" onclick="updateConfig()"> <i class="fa-solid fa-floppy-disk"></i> SAVE &amp; APPLY ALL SETTINGS </button> 
+     </div> <button class="btn btn-success" style="width: 100%; margin-top: 20px; padding: 15px; font-size: 1.1rem; box-shadow: 0 4px 6px rgba(0,0,0,0.1);" onclick="updateConfig()"> <i class="fa-solid fa-floppy-disk"></i> SAVE & APPLY ALL SETTINGS </button> 
     </div> 
     <div class="card"> 
      <h3>My Display Settings</h3> 
@@ -470,8 +483,8 @@
         <tr> 
          <th>Date</th> 
          <th>Staff Name</th> 
-         <th>Start Photo &amp; Time</th> 
-         <th>Stop Photo &amp; Time</th> 
+         <th>Start Photo & Time</th> 
+         <th>Stop Photo & Time</th> 
          <th>Total Time</th> 
          <th>Daily Notes</th> 
         </tr> 
@@ -515,7 +528,7 @@
     </div> 
     <div class="card"> 
      <div style="display:flex; justify-content: space-between; align-items:center; margin-bottom:15px; flex-wrap:wrap; gap:10px;"> 
-      <h3 style="margin:0;">Task Dashboard &amp; Replies</h3> <button class="btn btn-success" onclick="exportTasksExcel()"><i class="fa-solid fa-file-excel"></i> Export Pro Excel</button> 
+      <h3 style="margin:0;">Task Dashboard & Replies</h3> <button class="btn btn-success" onclick="exportTasksExcel()"><i class="fa-solid fa-file-excel"></i> Export Pro Excel</button> 
      </div> 
      <div id="admin-task-list"></div> 
     </div> 
@@ -634,8 +647,8 @@
        <thead> 
         <tr> 
          <th>Date</th> 
-         <th>Start Photo &amp; Time</th> 
-         <th>Stop Photo &amp; Time</th> 
+         <th>Start Photo & Time</th> 
+         <th>Stop Photo & Time</th> 
          <th>Total Time Worked</th> 
          <th>Daily Notes</th> 
         </tr> 
@@ -655,7 +668,7 @@
    
    <div id="emp-donations" class="section hidden"> 
     <div class="card"> 
-     <h3><i class="fa-solid fa-hand-holding-heart" style="color:var(--accent);"></i> Donation &amp; Donor Tracker</h3> 
+     <h3><i class="fa-solid fa-hand-holding-heart" style="color:var(--accent);"></i> Donation & Donor Tracker</h3> 
      <p style="font-size:0.85rem; color:#64748b; margin-bottom:15px;">Log details of donations collected on the field.</p> 
      <div class="grid-stats"> 
       <input type="text" id="donor-name" placeholder="Donor Name / Organization"> 
@@ -721,9 +734,9 @@
       <input type="text" id="resign-emp-id" readonly style="background:#f1f5f9; cursor:not-allowed;" title="Your User ID"> 
       <input type="text" id="resign-phone" placeholder="Contact Phone Number"> 
      </div> <textarea id="resign-reason" placeholder="State your reason for resignation in detail..." style="margin-bottom:15px; height:80px;"></textarea> 
-     <div style="background:#fef3c7; border:1px solid #f59e0b; padding:15px; border-radius:8px; margin-bottom:15px;"> <strong>Resignation Terms &amp; Conditions:</strong> 
+     <div style="background:#fef3c7; border:1px solid #f59e0b; padding:15px; border-radius:8px; margin-bottom:15px;"> <strong>Resignation Terms & Conditions:</strong> 
       <p id="emp-resign-tnc" style="font-size:0.85rem; color:#64748b; margin-top:5px; white-space:pre-wrap;"></p> 
-     </div> <button class="btn btn-danger" onclick="submitResignation()"><i class="fa-solid fa-paper-plane"></i> Submit Formal Resignation</button> <button class="btn btn-warning" onclick="generateResignationPDF()" style="margin-left:10px;"><i class="fa-solid fa-file-pdf"></i> Download Experience &amp; T&amp;C PDF</button> 
+     </div> <button class="btn btn-danger" onclick="submitResignation()"><i class="fa-solid fa-paper-plane"></i> Submit Formal Resignation</button> <button class="btn btn-warning" onclick="generateResignationPDF()" style="margin-left:10px;"><i class="fa-solid fa-file-pdf"></i> Download Experience & T&C PDF</button> 
     </div> 
     <div class="card no-print" style="overflow-x: auto;"> 
      <h3>My Resignation Requests</h3> 
@@ -788,7 +801,7 @@
    <div id="admin-salary" class="section hidden"> 
     <div class="card"> 
      <div style="display:flex; justify-content: space-between; align-items:center; flex-wrap: wrap; gap: 10px; margin-bottom:10px;"> 
-      <h3 style="margin:0;">Payroll &amp; Deductions</h3> <button class="btn btn-success" onclick="exportPayrollExcel()"><i class="fa-solid fa-file-excel"></i> Export Pro Excel</button> 
+      <h3 style="margin:0;">Payroll & Deductions</h3> <button class="btn btn-success" onclick="exportPayrollExcel()"><i class="fa-solid fa-file-excel"></i> Export Pro Excel</button> 
      </div> 
      <div style="overflow-x: auto;"> 
       <table id="payroll-table-main"> 
@@ -936,10 +949,9 @@
     </div> 
    </div> 
   </div> 
-  <div id="toast-container"></div>
 
   <script>
-        // GLOBAL VARIABLES (Fixed errors here)
+        // GLOBAL VARIABLES
         let camStream = null;
         let clockActionType = '';
         let currentLocation = null;
@@ -955,7 +967,6 @@
         let currentUser = null;
         let lastAnnText = "";
 
-        // --- UPDATED MAP LINKS AND LOG ENTRY ---
         function formatLogEntry(timeStr, imgStr, locStr) {
             if(!timeStr) return '<span style="color:var(--warning); font-weight:bold;">Waiting...</span>';
             
@@ -972,7 +983,7 @@
             html += `<div><div style="font-weight:bold; color:var(--primary); font-size:0.9rem;">${timeStr}</div>`;
             
             if(locStr && locStr.includes(',')) {
-                html += `<a href="https://www.google.com/maps?q=${locStr}" target="_blank" style="font-size:0.75rem; color:var(--success); text-decoration:none;"><i class="fa-solid fa-location-dot"></i> Open Map</a>`;
+                html += `<a href="http://googleusercontent.com/maps.google.com/?q=${locStr}" target="_blank" style="font-size:0.75rem; color:var(--success); text-decoration:none;"><i class="fa-solid fa-location-dot"></i> Open Map</a>`;
             } else if(locStr) {
                 html += `<span style="font-size:0.7rem; color:#94a3b8;">(${locStr})</span>`;
             } else {
@@ -1031,49 +1042,70 @@
         function toggleBadge(id, count) {
             const el = document.getElementById(id);
             if(el) {
-                if(count > 0) { el.innerText = count; el.classList.remove('hidden'); }
-                else { el.classList.add('hidden'); }
+                if(count > 0) { el.innerText = count; el.classList.remove('hidden'); el.classList.add('new-update'); }
+                else { el.classList.add('hidden'); el.classList.remove('new-update'); }
             }
         }
 
         function updateBadges() {
             if(!currentUser) return;
             
+            let totalNotifs = 0;
+
             if(currentUser.role === 'admin') {
                 const lReqs = DB.get('leaveReqs').filter(r => r.status === 'Pending').length;
                 const rReqs = DB.get('resignReqs').filter(r => r.status === 'Pending').length;
                 const eReqs = DB.get('expenses').filter(r => r.status === 'Pending').length;
 
-                if(previousCounts.leaves !== -1 && lReqs > previousCounts.leaves) { 
-                    showToast("New Leave Request Pending!", 'admin-leaves'); 
-                    document.getElementById('badge-admin-leaves')?.classList.add('new-update'); 
-                }
-                if(previousCounts.resigns !== -1 && rReqs > previousCounts.resigns) { 
-                    showToast("New Resignation Submitted!", 'admin-resign'); 
-                    document.getElementById('badge-admin-resign')?.classList.add('new-update'); 
-                }
-                if(previousCounts.expenses !== -1 && eReqs > previousCounts.expenses) { 
-                    showToast("New Expense Claim Submitted!", 'admin-expenses'); 
-                    document.getElementById('badge-admin-expenses')?.classList.add('new-update'); 
-                }
+                if(previousCounts.leaves !== -1 && lReqs > previousCounts.leaves) showToast("New Leave Request Pending!", 'admin-leaves'); 
+                if(previousCounts.resigns !== -1 && rReqs > previousCounts.resigns) showToast("New Resignation Submitted!", 'admin-resign'); 
+                if(previousCounts.expenses !== -1 && eReqs > previousCounts.expenses) showToast("New Expense Claim Submitted!", 'admin-expenses'); 
 
-                previousCounts.leaves = lReqs;
-                previousCounts.resigns = rReqs;
-                previousCounts.expenses = eReqs;
+                previousCounts.leaves = lReqs; previousCounts.resigns = rReqs; previousCounts.expenses = eReqs;
 
                 toggleBadge('badge-admin-leaves', lReqs);
                 toggleBadge('badge-admin-resign', rReqs);
                 toggleBadge('badge-admin-expenses', eReqs);
+                
+                totalNotifs = lReqs + rReqs + eReqs;
             } else {
                 const tasks = DB.get('tasks').filter(t => t.empId === currentUser.id && t.status !== 'Completed').length;
-                
-                if(previousCounts.tasks !== -1 && tasks > previousCounts.tasks) { 
-                    showToast("You have a new task assigned!", 'emp-tasks'); 
-                    document.getElementById('badge-emp-tasks')?.classList.add('new-update'); 
-                }
-                
+                if(previousCounts.tasks !== -1 && tasks > previousCounts.tasks) showToast("You have a new task assigned!", 'emp-tasks'); 
                 previousCounts.tasks = tasks;
                 toggleBadge('badge-emp-tasks', tasks);
+
+                // Staff Approved/Rejected tracking logic
+                const decidedLeaves = DB.get('leaveReqs').filter(r => r.empId === currentUser.id && r.status !== 'Pending').length;
+                const seenLeaves = parseInt(localStorage.getItem('seenLeaves_' + currentUser.id) || 0);
+                const newLeaves = Math.max(0, decidedLeaves - seenLeaves);
+                toggleBadge('badge-emp-leaves', newLeaves);
+                if(previousCounts.leaves !== -1 && decidedLeaves > previousCounts.leaves) showToast("Leave status updated!", 'emp-leaves');
+                previousCounts.leaves = decidedLeaves;
+
+                const decidedExps = DB.get('expenses').filter(r => r.empId === currentUser.id && r.status !== 'Pending').length;
+                const seenExps = parseInt(localStorage.getItem('seenExps_' + currentUser.id) || 0);
+                const newExps = Math.max(0, decidedExps - seenExps);
+                toggleBadge('badge-emp-expenses', newExps);
+                if(previousCounts.expenses !== -1 && decidedExps > previousCounts.expenses) showToast("Expense claim status updated!", 'emp-expenses');
+                previousCounts.expenses = decidedExps;
+
+                const currentAnn = DB.get('ann');
+                const seenAnn = localStorage.getItem('seenAnn_' + currentUser.id) || '';
+                const hasNewAnn = currentAnn && currentAnn !== seenAnn;
+                
+                const dashBadge = document.getElementById('badge-emp-dash');
+                if(dashBadge) {
+                    if(hasNewAnn) { dashBadge.innerText = '!'; dashBadge.classList.remove('hidden'); dashBadge.classList.add('new-update'); } 
+                    else { dashBadge.classList.add('hidden'); dashBadge.classList.remove('new-update'); }
+                }
+
+                totalNotifs = tasks + newLeaves + newExps + (hasNewAnn ? 1 : 0);
+            }
+
+            const globalMenuBadge = document.getElementById('global-menu-badge');
+            if(globalMenuBadge) {
+                if(totalNotifs > 0) globalMenuBadge.classList.remove('hidden');
+                else globalMenuBadge.classList.add('hidden');
             }
         }
 
@@ -1120,14 +1152,11 @@
         const cloudDB = firebase.firestore();
 
         const DB = {
-            get: (k) => {
-                return inMemoryData[k] || [];
-            },
+            get: (k) => { return inMemoryData[k] || []; },
             set: (k, v) => {
                 inMemoryData[k] = v;
-                cloudDB.collection("erp_fth").doc(k).set({ 
-                    dataStr: JSON.stringify(v) 
-                }).catch(err => console.error("Cloud Sync Error:", err));
+                cloudDB.collection("erp_fth").doc(k).set({ dataStr: JSON.stringify(v) })
+                .catch(err => console.error("Cloud Sync Error:", err));
             },
             init: () => {
                 cloudDB.collection("erp_fth").onSnapshot((snapshot) => {
@@ -1147,8 +1176,6 @@
 
                     if (isFirstLoad) {
                         applyGlobalConfig();
-                        
-                        // Auto-Login Persistent State Check
                         const savedUserId = localStorage.getItem('loggedInUserId');
                         if (savedUserId && inMemoryData['employees']) {
                             const user = inMemoryData['employees'].find(e => e.id === savedUserId);
@@ -1158,13 +1185,10 @@
                                 updateProfileCardUI();
                                 updateBadges();
                                 user.role === 'admin' ? document.getElementById('admin-links').classList.remove('hidden') : document.getElementById('emp-links').classList.remove('hidden');
-                                
                                 let lastSec = localStorage.getItem('lastSection') || (user.role === 'admin' ? 'admin-dash' : 'emp-dash');
                                 navigate(lastSec);
-                                
                                 lastAnnText = DB.get('ann'); 
                                 checkAnnPeriodic();
-                                
                                 const currMonth = new Date().getMonth();
                                 if(document.getElementById('report-month')) document.getElementById('report-month').value = currMonth;
                                 if(document.getElementById('emp-slip-month')) document.getElementById('emp-slip-month').value = currMonth;
@@ -1183,7 +1207,6 @@
         };
         
         DB.init();
-        // ---------------------------------------------------------
 
         function login() {
             const u = document.getElementById('username').value, p = document.getElementById('password').value;
@@ -1216,7 +1239,7 @@
                 }
 
                 currentUser = user;
-                localStorage.setItem('loggedInUserId', currentUser.id); // Save Session
+                localStorage.setItem('loggedInUserId', currentUser.id);
 
                 document.getElementById('login-screen').classList.add('hidden');
                 updateProfileCardUI();
@@ -1245,7 +1268,6 @@
             else { p.type = 'password'; i.classList.remove('fa-eye-slash'); i.classList.add('fa-eye'); }
         }
 
-        // --- FORGOT PASSWORD LOGIC ---
         let tempOtp = null;
         let tempOtpUser = null;
 
@@ -1284,7 +1306,7 @@
             let idx = emps.findIndex(e => e.id === tempOtpUser.id);
             if(idx > -1) {
                 emps[idx].pass = newPass;
-                DB.set('employees', emps); // Updates Cloud Instantly
+                DB.set('employees', emps);
                 alert("Password successfully reset! You can now log in.");
                 closeForgotPassword();
             }
@@ -1306,7 +1328,6 @@
                 return;
             }
 
-            // Require location BEFORE allowing photo capture
             navigator.geolocation.getCurrentPosition(pos => {
                 currentLocation = `${pos.coords.latitude},${pos.coords.longitude}`;
                 document.getElementById('camera-status').innerText = "Location Verified! Opening Camera...";
@@ -1590,14 +1611,24 @@
         }
 
         function navigate(id) {
+            if(currentUser && currentUser.role !== 'admin') {
+                if(id === 'emp-leaves') {
+                    const decided = DB.get('leaveReqs').filter(r => r.empId === currentUser.id && r.status !== 'Pending').length;
+                    localStorage.setItem('seenLeaves_' + currentUser.id, decided);
+                }
+                if(id === 'emp-expenses') {
+                    const decided = DB.get('expenses').filter(r => r.empId === currentUser.id && r.status !== 'Pending').length;
+                    localStorage.setItem('seenExps_' + currentUser.id, decided);
+                }
+                if(id === 'emp-dash') {
+                    const currentAnn = DB.get('ann') || '';
+                    localStorage.setItem('seenAnn_' + currentUser.id, currentAnn);
+                }
+            }
+
             document.querySelectorAll('.section').forEach(s => s.classList.add('hidden'));
             document.getElementById(id).classList.remove('hidden');
             document.getElementById('page-title').innerText = id.replace('-', ' ').toUpperCase();
-            
-            if(id === 'admin-leaves') document.getElementById('badge-admin-leaves')?.classList.remove('new-update');
-            if(id === 'admin-resign') document.getElementById('badge-admin-resign')?.classList.remove('new-update');
-            if(id === 'admin-expenses') document.getElementById('badge-admin-expenses')?.classList.remove('new-update');
-            if(id === 'emp-tasks') document.getElementById('badge-emp-tasks')?.classList.remove('new-update');
             
             let highlightId = id;
             if(id === 'admin-employee-profile') highlightId = 'admin-staff';
@@ -2482,6 +2513,8 @@
             document.getElementById('attendance-modal').classList.remove('hidden');
         }
 
+        function closeAttendanceModal() { document.getElementById('attendance-modal').classList.add('hidden'); }
+
         function editStaff(id) {
             let emps = DB.get('employees'); let idx = emps.findIndex(x => x.id === id);
             if(idx > -1) {
@@ -2489,466 +2522,4 @@
                 let ph = prompt("Update Phone Number:", emps[idx].phone || "") || emps[idx].phone;
                 let em = prompt("Update Email:", emps[idx].email || "") || emps[idx].email;
                 let p = prompt("Update Password:", emps[idx].pass) || emps[idx].pass; 
-                let s = prompt("Update Salary:", emps[idx].salary) || emps[idx].salary;
-                emps[idx].name = n; emps[idx].phone = ph; emps[idx].email = em; emps[idx].pass = p; emps[idx].salary = s;
-                DB.set('employees', emps); loadStaffTable(); if(!document.getElementById('admin-dash').classList.contains('hidden')) loadAdminStats();
-            }
-        }
-
-        function loadStaffTable() {
-            const l = document.getElementById('staff-table'); l.innerHTML = '';
-            DB.get('employees').forEach(e => {
-                if(e.role !== 'admin') {
-                    const picHtml = e.pic ? `<img src="${e.pic}" style="width:35px;height:35px;border-radius:50%;object-fit:cover;border:1px solid #cbd5e1;">` : `<i class="fa-solid fa-user-circle" style="font-size:30px;color:#cbd5e1;"></i>`;
-                    l.innerHTML += `<tr><td>${picHtml}</td><td style="padding:10px;">${e.id}</td><td>${e.name}</td><td>${e.phone || '-'}</td><td>${e.email || '-'}</td><td style="color:var(--danger)">${e.pass}</td><td>₹${e.salary}</td><td>
-                        <button class="btn btn-info btn-sm" style="background:#0284c7; color:white;" title="View Full Profile" onclick="viewEmployeeProfile('${e.id}')"><i class="fa-solid fa-id-badge"></i></button>
-                        <button class="btn btn-warning btn-sm" title="View Attendance" onclick="viewStaffAttendance('${e.id}', '${e.name}')"><i class="fa-solid fa-clock-rotate-left"></i></button> 
-                        <button class="btn btn-primary btn-sm" title="Edit" onclick="editStaff('${e.id}')"><i class="fa-solid fa-pen"></i></button> 
-                        <button class="btn btn-danger btn-sm" title="Delete" onclick="deleteStaff('${e.id}')"><i class="fa-solid fa-trash"></i></button>
-                    </td></tr>`;
-                }
-            });
-        }
-        
-        function registerStaff() {
-            const n = document.getElementById('n-name').value; 
-            const id = document.getElementById('n-id').value; 
-            const phone = document.getElementById('n-phone').value;
-            const em = document.getElementById('n-email').value; 
-            const p = document.getElementById('n-pass').value; 
-            const s = document.getElementById('n-sal').value; 
-            const picInput = document.getElementById('n-pic');
-            
-            if(!n || !id) return alert("Please fill required fields (Name & ID).");
-            if(picInput.files.length > 0) { 
-                const reader = new FileReader(); 
-                reader.onload = () => { finalizeStaffRegistration(n, id, phone, em, p, s, reader.result); }; 
-                reader.readAsDataURL(picInput.files[0]); 
-            } else { 
-                finalizeStaffRegistration(n, id, phone, em, p, s, ''); 
-            }
-        }
-
-        function finalizeStaffRegistration(n, id, phone, em, p, s, picData) {
-            let emps = DB.get('employees'); emps.push({id: id, name: n, phone: phone, email: em, pass: p, role: 'employee', salary: s, pic: picData, createdAt: Date.now()});
-            DB.set('employees', emps); loadStaffTable(); if(!document.getElementById('admin-dash').classList.contains('hidden')) loadAdminStats();
-            document.getElementById('n-name').value = ''; document.getElementById('n-id').value = ''; document.getElementById('n-phone').value = ''; document.getElementById('n-email').value = ''; document.getElementById('n-pass').value = ''; document.getElementById('n-sal').value = ''; document.getElementById('n-pic').value = ''; alert("Staff Member Added!");
-        }
-        
-        function deleteStaff(id) { if(confirm("Delete?")) { let emps = DB.get('employees').filter(x => x.id !== id); DB.set('employees', emps); loadStaffTable(); if(!document.getElementById('admin-dash').classList.contains('hidden')) loadAdminStats(); } }
-        
-        function populateIdSelect() { const sel = document.getElementById('id-select'); sel.innerHTML = ''; DB.get('employees').forEach(e => { if(e.role !== 'admin') sel.innerHTML += `<option value="${e.id}">${e.name}</option>`; }); updateIdPreview(); }
-        function updateIdPreview() { const uid = document.getElementById('id-select').value; const emp = DB.get('employees').find(e => e.id === uid); if(emp) { document.getElementById('id-preview-name').innerText = document.getElementById('id-name-edit').value || emp.name; document.getElementById('id-preview-uid').innerText = "ID: " + emp.id; document.getElementById('id-preview-img').src = emp.pic ? emp.pic : ""; } }
-        function previewPhoto(event) { const reader = new FileReader(); reader.onload = () => document.getElementById('id-preview-img').src = reader.result; reader.readAsDataURL(event.target.files[0]); }
-        
-        function applyLeave() { const d = document.getElementById('leave-date').value; const t = document.getElementById('leave-type').value; const r = document.getElementById('leave-reason').value; if(!d) return; let reqs = DB.get('leaveReqs'); reqs.push({id: Date.now(), empId: currentUser.id, empName: currentUser.name, date: d, type: t, reason: r, status: 'Pending'}); DB.set('leaveReqs', reqs); loadEmpLeaves(); updateBadges(); alert("Leave requested!"); }
-        function loadEmpLeaves() { const reqs = DB.get('leaveReqs').filter(r => r.empId === currentUser.id).reverse(); document.getElementById('emp-leave-history').innerHTML = reqs.map(r => `<tr><td>${r.date}</td><td><span class="badge" style="background:#e2e8f0; color:#334155">${r.type || 'Unpaid'}</span></td><td><span class="badge badge-${r.status}">${r.status}</span></td></tr>`).join(''); }
-        
-        function populateAdminLeaveEmpSelect() {
-            const emps = DB.get('employees').filter(e => e.role !== 'admin');
-            const sel = document.getElementById('admin-assign-leave-emp');
-            if(sel) { sel.innerHTML = '<option value="">Select Staff...</option>' + emps.map(e => `<option value="${e.id}">${e.name}</option>`).join(''); }
-        }
-
-        function adminAssignLeave() {
-            const empId = document.getElementById('admin-assign-leave-emp').value;
-            const d = document.getElementById('admin-assign-leave-date').value;
-            const t = document.getElementById('admin-assign-leave-type').value;
-            const r = document.getElementById('admin-assign-leave-reason').value;
-            
-            if(!empId || !d) return alert("Please select a staff member and date.");
-            
-            const emp = DB.get('employees').find(e => e.id === empId);
-            let reqs = DB.get('leaveReqs');
-            reqs.push({id: Date.now(), empId: emp.id, empName: emp.name, date: d, type: t, reason: r || 'Admin Assigned', status: 'Approved'});
-            DB.set('leaveReqs', reqs);
-            
-            document.getElementById('admin-assign-leave-date').value = '';
-            document.getElementById('admin-assign-leave-reason').value = '';
-            
-            loadAdminLeaves();
-            loadAdminLeaveHistory();
-            if(!document.getElementById('admin-dash').classList.contains('hidden')) loadAdminStats();
-            alert("Leave assigned and approved automatically.");
-            updateBadges();
-        }
-
-        function loadAdminLeaveHistory() {
-            const history = DB.get('leaveReqs').filter(r => r.status !== 'Pending').reverse();
-            const list = document.getElementById('admin-leave-history-list');
-            if(list) {
-                if(history.length === 0) {
-                    list.innerHTML = '<tr><td colspan="6" style="text-align:center; padding: 20px; color:#64748b;">No leave history found.</td></tr>';
-                } else {
-                    list.innerHTML = history.map(r => `
-                        <tr>
-                            <td>${r.empName}</td>
-                            <td>${r.date}</td>
-                            <td><span class="badge" style="background:#e2e8f0; color:#334155">${r.type || 'Unpaid'}</span></td>
-                            <td>${r.reason}</td>
-                            <td><span class="badge badge-${r.status}">${r.status}</span></td>
-                            <td><button class="btn btn-danger btn-sm" onclick="deleteLeaveReq(${r.id})"><i class="fa-solid fa-trash"></i></button></td>
-                        </tr>
-                    `).join('');
-                }
-            }
-        }
-
-        function deleteLeaveReq(id) {
-            if(confirm("Are you sure you want to delete this leave record?")) {
-                let reqs = DB.get('leaveReqs').filter(r => r.id !== id);
-                DB.set('leaveReqs', reqs);
-                loadAdminLeaves();
-                loadAdminLeaveHistory();
-                if(!document.getElementById('admin-dash').classList.contains('hidden')) loadAdminStats();
-                updateBadges();
-            }
-        }
-        
-        function loadAdminLeaves() { 
-            const pending = DB.get('leaveReqs').filter(r => r.status === 'Pending'); 
-            document.getElementById('admin-leave-list').innerHTML = pending.map(r => `<tr><td>${r.empName}</td><td>${r.date}</td><td><strong>${r.type || 'Unpaid'}</strong></td><td>${r.reason}</td><td><button class="btn btn-success btn-sm" onclick="processLeave(${r.id}, 'Approved')">✔</button> <button class="btn btn-danger btn-sm" onclick="processLeave(${r.id}, 'Rejected')">✖</button></td></tr>`).join(''); 
-        }
-        
-        function processLeave(reqId, newStatus) { 
-            let reqs = DB.get('leaveReqs'); 
-            let idx = reqs.findIndex(r => r.id === reqId); 
-            reqs[idx].status = newStatus; 
-            DB.set('leaveReqs', reqs); 
-            loadAdminLeaves(); 
-            loadAdminLeaveHistory();
-            if(!document.getElementById('admin-dash').classList.contains('hidden')) loadAdminStats(); 
-            updateBadges();
-        }
-        
-        function loadPayroll() {
-            const employees = DB.get('employees').filter(e => e.role !== 'admin'); const currentMonth = new Date().getMonth(); 
-            
-            let cfg = DB.get('config') || {};
-            let latePenaltyAmt = cfg.latePenalty || 0;
-
-            document.getElementById('payroll-table').innerHTML = employees.map(emp => {
-                const unpaidLeaves = DB.get('leaveReqs').filter(l => l.empId === emp.id && l.status === 'Approved' && (l.type === 'Unpaid' || !l.type) && new Date(l.date).getMonth() === currentMonth).length;
-                const lateDays = DB.get('attendance').filter(a => a.id === emp.id && new Date(a.date).getMonth() === currentMonth && a.isLate).length;
-                
-                const leaveDed = Math.round((emp.salary/30) * unpaidLeaves);
-                const lateDed = lateDays * latePenaltyAmt;
-                const totalDed = leaveDed + lateDed;
-                const net = emp.salary - totalDed;
-                
-                return `<tr><td>${emp.id}</td><td>${emp.name}</td><td>₹${emp.salary}</td><td>${unpaidLeaves}</td><td>${lateDays}</td><td style="color:red">-₹${totalDed}</td><td style="color:green; font-weight:bold;">₹${net}</td></tr>`;
-            }).join('');
-        }
-        
-        function renderCal(divId) {
-            const div = document.getElementById(divId); div.innerHTML = ''; const now = new Date(); const days = new Date(now.getFullYear(), now.getMonth()+1, 0).getDate(); const hols = DB.get('holidays');
-            for(let d=1; d<=days; d++) {
-                const dateStr = `${now.getFullYear()}-${now.getMonth()+1}-${d}`; const day = document.createElement('div');
-                day.className = 'cal-day' + (hols.includes(dateStr) ? ' cal-holiday' : ''); if(d === now.getDate()) day.classList.add('cal-today'); day.innerText = d;
-                if(divId === 'holiday-editor') { day.onclick = () => { let currentHols = DB.get('holidays'); if(currentHols.includes(dateStr)) currentHols = currentHols.filter(x => x !== dateStr); else currentHols.push(dateStr); DB.set('holidays', currentHols); renderCal(divId); }; }
-                div.appendChild(day);
-            }
-        }
-        
-        function executeClockIn(img, loc) { 
-            let att = DB.get('attendance'); let r = att.find(x => x.id === currentUser.id && x.date === new Date().toLocaleDateString());
-            
-            let cfg = DB.get('config') || {};
-            let isLate = false;
-            if(cfg.shiftTime) {
-                let now = new Date();
-                let shiftTimeParts = cfg.shiftTime.split(':');
-                let shiftLimit = new Date();
-                shiftLimit.setHours(parseInt(shiftTimeParts[0]), parseInt(shiftTimeParts[1]), 0, 0);
-                if(now > shiftLimit) { isLate = true; }
-            }
-
-            if(!r) { att.push({ id: currentUser.id, date: new Date().toLocaleDateString(), in: formatTimeAMPM(), inImg: img, inLoc: loc, isLate: isLate, out: '', outImg: '', outLoc: '', notes: [], startTimestamp: Date.now() }); DB.set('attendance', att); }
-            checkClock(); 
-        }
-        
-        function executeClockOut(img, loc) { 
-            let att = DB.get('attendance'); let r = att.find(x => x.id === currentUser.id && x.date === new Date().toLocaleDateString() && !x.out); 
-            if(r) { r.out = formatTimeAMPM(); r.outImg = img; r.outLoc = loc; r.endTimestamp = Date.now(); DB.set('attendance', att); checkClock(); } 
-        }
-        
-        function checkClock() { 
-            const r = DB.get('attendance').find(x => x.id === currentUser.id && x.date === new Date().toLocaleDateString()); 
-            const btnIn = document.getElementById('btn-in'), btnOut = document.getElementById('btn-out'), timerDiv = document.getElementById('live-timer'), timesDiv = document.getElementById('log-times-display');
-            clearInterval(liveTimerInterval); 
-            
-            if (!r) { 
-                btnIn.disabled = false; btnIn.innerText = "START"; 
-                btnOut.disabled = true; btnOut.innerText = "STOP"; 
-                if(timerDiv) timerDiv.classList.add('hidden'); 
-                if(timesDiv) timesDiv.classList.add('hidden');
-            } 
-            else if (r && !r.out) {
-                btnIn.disabled = true; btnIn.innerText = "STARTED"; 
-                btnOut.disabled = false; btnOut.innerText = "STOP";
-                
-                if(timesDiv) {
-                    timesDiv.classList.remove('hidden');
-                    let lateWarning = r.isLate ? ` <span style="color:var(--danger); font-size:0.7rem; padding:2px 5px; background:#fee2e2; border-radius:4px; margin-left:5px;">LATE</span>` : '';
-                    let mapLink = r.inLoc ? ` &nbsp;|&nbsp; <a href="https://www.google.com/maps?q=${r.inLoc}" target="_blank" style="color:var(--accent); text-decoration:none;"><i class="fa-solid fa-location-dot"></i> View Map</a>` : '';
-                    timesDiv.innerHTML = `<span style="color:var(--success);"><i class="fa-solid fa-play"></i> Started: ${r.in}</span>${lateWarning}${mapLink}`;
-                }
-
-                if(timerDiv) {
-                    timerDiv.classList.remove('hidden'); 
-                    timerDiv.style.color = "var(--success)";
-                    timerDiv.style.background = "#d1fae5";
-                    
-                    let start = r.startTimestamp || Date.now();
-                    if(!r.startTimestamp) { let att = DB.get('attendance'); let idx = att.findIndex(x => x.id === r.id && x.date === r.date); att[idx].startTimestamp = start; DB.set('attendance', att); }
-                    
-                    liveTimerInterval = setInterval(() => { let elapsed = Date.now() - start; timerDiv.innerText = "⏱️ Running Time: " + formatDuration(elapsed); }, 1000);
-                    timerDiv.innerText = "⏱️ Running Time: " + formatDuration(Date.now() - start);
-                }
-            } else { 
-                btnIn.disabled = true; btnIn.innerText = "STARTED"; 
-                btnOut.disabled = true; btnOut.innerText = "STOPPED"; 
-                
-                if(timesDiv) {
-                    timesDiv.classList.remove('hidden');
-                    let lateWarning = r.isLate ? ` <span style="color:var(--danger); font-size:0.7rem; padding:2px 5px; background:#fee2e2; border-radius:4px; margin-left:5px;">LATE</span>` : '';
-                    let inMap = r.inLoc ? ` <a href="https://www.google.com/maps?q=${r.inLoc}" target="_blank" style="color:var(--accent);"><i class="fa-solid fa-location-dot"></i></a>` : '';
-                    let outMap = r.outLoc ? ` <a href="https://www.google.com/maps?q=${r.outLoc}" target="_blank" style="color:var(--accent);"><i class="fa-solid fa-location-dot"></i></a>` : '';
-                    timesDiv.innerHTML = `<span style="color:var(--success);"><i class="fa-solid fa-play"></i> Started: ${r.in} ${inMap}</span>${lateWarning} &nbsp;|&nbsp; <span style="color:var(--danger);"><i class="fa-solid fa-stop"></i> Stopped: ${r.out} ${outMap}</span>`;
-                }
-
-                if(timerDiv) {
-                    timerDiv.classList.remove('hidden'); 
-                    let finalDuration = "00h 00m 00s";
-                    if(r.startTimestamp && r.endTimestamp) finalDuration = formatDuration(r.endTimestamp - r.startTimestamp);
-                    
-                    timerDiv.innerText = "✅ Total Worked Today: " + finalDuration;
-                    timerDiv.style.color = "var(--primary)";
-                    timerDiv.style.background = "#e2e8f0";
-                } 
-            }
-        }
-
-        function loadEmpAttendanceHistory() {
-            const records = DB.get('attendance').filter(a => a.id === currentUser.id).reverse(); const tbody = document.getElementById('emp-attendance-history-list');
-            if(records.length === 0) { tbody.innerHTML = '<tr><td colspan="5" style="text-align:center; padding:20px; color:#64748b;">No attendance history found.</td></tr>'; return; }
-            tbody.innerHTML = records.map(r => {
-                const inHtml = formatLogEntry(r.in, r.inImg, r.inLoc) + (r.isLate ? `<div style="color:var(--danger); font-size:0.75rem; font-weight:bold; margin-top:2px;">(LATE)</div>` : '');
-                const outHtml = formatLogEntry(r.out, r.outImg, r.outLoc); 
-                
-                let duration = '-';
-                if(r.startTimestamp && r.endTimestamp) { duration = formatDuration(r.endTimestamp - r.startTimestamp); } 
-                else if(r.startTimestamp && !r.out) { duration = `<span class="live-table-tick" data-start="${r.startTimestamp}"><i class="fa-solid fa-spinner fa-spin"></i> Running...</span>`; }
-                else if(!r.out) { duration = `<span style="color:var(--warning); font-weight:bold;">Working...</span>`; }
-                
-                const notesHtml = (r.notes || []).map(n => `<div style="font-size:0.75rem; margin-bottom:3px;"><span style="color:var(--accent); font-weight:bold;">${n.time}</span> - ${n.text}</div>`).join('');
-                return `<tr><td>${r.date}</td><td>${inHtml}</td><td>${outHtml}</td><td style="font-weight:bold; color:var(--primary);">${duration}</td><td>${notesHtml || '<span style="color:#94a3b8; font-size:0.8rem;">-</span>'}</td></tr>`;
-            }).join('');
-        }
-
-        function addEmpNote() {
-            const text = document.getElementById('emp-note-input').value; if(!text) return;
-            let att = DB.get('attendance'); let r = att.find(x => x.id === currentUser.id && x.date === new Date().toLocaleDateString());
-            if(r) { if(!r.notes) r.notes = []; r.notes.push({time: formatTimeAMPM(), text: text}); DB.set('attendance', att); document.getElementById('emp-note-input').value = ''; loadEmpNotesUI(); alert("Note added to your daily log!"); } 
-            else { alert("You must start your shift before adding a note!"); }
-        }
-
-        function loadEmpNotesUI() {
-            const r = DB.get('attendance').find(x => x.id === currentUser.id && x.date === new Date().toLocaleDateString()); const listDiv = document.getElementById('emp-notes-list');
-            if(!r || !r.notes || r.notes.length === 0) { listDiv.innerHTML = '<p style="color:#94a3b8; font-size:0.8rem;">No notes added today.</p>'; } 
-            else { listDiv.innerHTML = r.notes.map(n => `<div style="padding:8px; background:#f1f5f9; border-radius:6px; margin-bottom:5px; font-size:0.85rem;"><strong style="color:var(--accent);">${n.time}</strong> - ${n.text}</div>`).join(''); }
-        }
-        
-        function savePersonalNotes() {
-            let allNotes = DB.get('personalNotes') || {};
-            allNotes[currentUser.id] = document.getElementById('emp-personal-notes').value;
-            DB.set('personalNotes', allNotes);
-        }
-
-        function loadPersonalNotes() {
-            let allNotes = DB.get('personalNotes') || {};
-            if(document.getElementById('emp-personal-notes')) {
-                document.getElementById('emp-personal-notes').value = allNotes[currentUser.id] || '';
-            }
-        }
-
-        function loadEmpStats() {
-            document.getElementById('stat-worked').innerText = DB.get('attendance').filter(a => a.id === currentUser.id).length;
-            document.getElementById('stat-leaves').innerText = DB.get('leaveReqs').filter(l => l.empId === currentUser.id && l.status === 'Approved').length;
-            renderEmpCharts(); 
-        }
-
-        function postAnn() { 
-            DB.set('ann', document.getElementById('ann-input').value); 
-            alert("Announcement Posted! All online staff will be notified."); 
-            checkAnnPeriodic(); 
-        }
-        function deleteAnn() { DB.set('ann', ""); checkAnnPeriodic(); }
-        
-        function checkAnnPeriodic() {
-            const msg = DB.get('ann');
-            if(msg && msg !== lastAnnText) {
-                lastAnnText = msg;
-                document.getElementById('ann-banner').classList.remove('hidden');
-                document.getElementById('ann-text').innerText = msg;
-                if(currentUser && document.getElementById('login-screen').classList.contains('hidden')) {
-                    playAnnSound(); 
-                }
-            } else if (!msg) {
-                lastAnnText = "";
-                document.getElementById('ann-banner').classList.add('hidden');
-            } else if (msg) {
-                document.getElementById('ann-banner').classList.remove('hidden');
-                document.getElementById('ann-text').innerText = msg;
-            }
-        }
-        function checkAnn() { checkAnnPeriodic(); }
-        
-        setInterval(() => { 
-            if(document.getElementById('clock')) document.getElementById('clock').innerText = formatTimeAMPM(); 
-            
-            checkAnnPeriodic();
-            
-            document.querySelectorAll('.live-table-tick').forEach(el => {
-                let start = parseInt(el.getAttribute('data-start'));
-                if(start) {
-                    el.innerHTML = `<span style="color:var(--warning);"><i class="fa-solid fa-clock fa-spin"></i> ${formatDuration(Date.now() - start)}</span>`;
-                }
-            });
-        }, 1000);
-        
-        // ===== BACKUP & RESTORE FUNCTIONS =====
-        function backupDatabase() {
-            try {
-                const backup = {
-                    timestamp: new Date().toISOString(),
-                    version: '1.0',
-                    data: {
-                        employees: DB.get('employees'),
-                        attendance: DB.get('attendance'),
-                        holidays: DB.get('holidays'),
-                        ann: DB.get('ann'),
-                        leaveReqs: DB.get('leaveReqs'),
-                        expenses: DB.get('expenses'),
-                        tasks: DB.get('tasks'),
-                        donations: DB.get('donations'),
-                        config: DB.get('config'),
-                        personalNotes: DB.get('personalNotes'),
-                        resignReqs: DB.get('resignReqs')
-                    }
-                };
-                
-                const jsonStr = JSON.stringify(backup, null, 2);
-                const blob = new Blob([jsonStr], { type: 'application/json' });
-                const url = URL.createObjectURL(blob);
-                const link = document.createElement('a');
-                link.href = url;
-                link.download = `FTH_Backup_${new Date().getTime()}.json`;
-                link.click();
-                URL.revokeObjectURL(url);
-                
-                alert('✅ Database backup completed successfully!\n\nFile: FTH_Backup_' + new Date().getTime() + '.json');
-            } catch(e) {
-                alert('❌ Backup failed: ' + e.message);
-                console.error('Backup error:', e);
-            }
-        }
-        
-        function restoreDatabase(event) {
-            const file = event.target.files[0];
-            if(!file) return;
-            
-            if(!confirm('⚠️ WARNING: This will OVERWRITE all current data!\n\nAre you absolutely sure you want to restore from this backup?')) {
-                event.target.value = '';
-                return;
-            }
-            
-            const reader = new FileReader();
-            reader.onload = function(e) {
-                try {
-                    const backup = JSON.parse(e.target.result);
-                    
-                    if(!backup.data) {
-                        throw new Error('Invalid backup file format');
-                    }
-                    
-                    DB.set('employees', backup.data.employees || []);
-                    DB.set('attendance', backup.data.attendance || []);
-                    DB.set('holidays', backup.data.holidays || []);
-                    DB.set('ann', backup.data.ann || '');
-                    DB.set('leaveReqs', backup.data.leaveReqs || []);
-                    DB.set('expenses', backup.data.expenses || []);
-                    DB.set('tasks', backup.data.tasks || []);
-                    DB.set('donations', backup.data.donations || []);
-                    DB.set('config', backup.data.config || {});
-                    DB.set('personalNotes', backup.data.personalNotes || {});
-                    DB.set('resignReqs', backup.data.resignReqs || []);
-                    
-                    alert('✅ Database restored successfully!\n\nBackup timestamp: ' + backup.timestamp + '\n\nPlease refresh the page to see all changes.');
-                    event.target.value = '';
-                    
-                    setTimeout(() => { location.reload(); }, 2000);
-                } catch(err) {
-                    alert('❌ Restore failed: ' + err.message + '\n\nPlease ensure you uploaded a valid backup file.');
-                    event.target.value = '';
-                    console.error('Restore error:', err);
-                }
-            };
-            reader.readAsText(file);
-        }
-        
-        function wipeSystemData() {
-            if(!confirm('⚠️ CRITICAL WARNING!\n\nThis will DELETE ALL system data including:\n• All Staff Records\n• All Attendance Logs\n• All Tasks & Donations\n• All Expense Claims\n• All Leave & Resignation Requests\n\nOnly the Super Admin account will remain.\n\nThis action CANNOT be undone!\n\nType "CONFIRM" in the next prompt to proceed.')) {
-                return;
-            }
-            
-            const confirmText = prompt('Type "CONFIRM" to permanently delete all data:');
-            if(confirmText !== 'CONFIRM') {
-                alert('❌ Wipe cancelled. Your data is safe.');
-                return;
-            }
-            
-            try {
-                const adminUser = [{id:'Shiva@0334', name:'Super Admin', email: '', phone: '', pass:'Shiva@0334', role:'admin', salary: 100000, pic: '', createdAt: Date.now()}];
-                
-                DB.set('employees', adminUser);
-                DB.set('attendance', []);
-                DB.set('holidays', []);
-                DB.set('ann', '');
-                DB.set('leaveReqs', []);
-                DB.set('expenses', []);
-                DB.set('tasks', []);
-                DB.set('donations', []);
-                DB.set('personalNotes', {});
-                DB.set('resignReqs', []);
-                
-                DB.set('config', { 
-                    empExpenses: true, empPayslip: true, annSound: true, maxPaidLeaves: 20, 
-                    shiftTime: '09:30', latePenalty: 0, logo: '', tnc: '', resignTnc: 'Please serve a 30-day notice period.',
-                    loginBg: 'https://images.unsplash.com/photo-1548232979-6c557ee14752?q=80&w=1000&auto=format&fit=crop'
-                });
-                
-                alert('✅ All system data has been wiped!\n\nThe system is now reset to factory defaults.\nOnly the Super Admin account remains.\n\nPlease refresh the page.');
-                
-                setTimeout(() => { location.reload(); }, 2000);
-            } catch(e) {
-                alert('❌ Wipe operation failed: ' + e.message);
-                console.error('Wipe error:', e);
-            }
-        }
-        
-        function secureReset() {
-            if(!confirm('🔐 Emergency System Reset\n\nThis will reset your login session and return to the login screen.\n\nContinue?')) {
-                return;
-            }
-            
-            try {
-                userLogout();
-            } catch(e) {
-                alert('❌ Reset failed: ' + e.message);
-            }
-        }
-  
-    </script> 
- </body>
-</html>
+                let s = prompt("Update Salary:", emps
