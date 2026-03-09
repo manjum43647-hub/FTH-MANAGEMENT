@@ -1075,7 +1075,7 @@
             document.getElementById('camera-modal').classList.add('hidden');
             if(camStream) { camStream.getTracks().forEach(track => track.stop()); camStream = null; }
             if(document.getElementById('manual-photo-btn')) document.getElementById('manual-photo-btn').disabled = false;
-        }
+        
 
         // --- UPDATED MAP LINKS AND LOG ENTRY ---
         function formatLogEntry(timeStr, imgStr, locStr) {
