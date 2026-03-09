@@ -1538,10 +1538,20 @@
             if(id === 'admin-expenses') document.getElementById('badge-admin-expenses')?.classList.remove('new-update');
             if(id === 'emp-tasks') document.getElementById('badge-emp-tasks')?.classList.remove('new-update');
             
+            // --- BULLETPROOF HIGHLIGHT LOGIC ---
+            let highlightId = id;
+            // If viewing a specific profile, keep the Staff Directory tab highlighted
+            if(id === 'admin-employee-profile') highlightId = 'admin-staff';
+
             document.querySelectorAll('.sidebar a').forEach(a => {
                 a.classList.remove('active');
-                if(a.getAttribute('onclick') === `Maps('${id}')`) a.classList.add('active');
+                let onClickAttr = a.getAttribute('onclick') || '';
+                // Use .includes() so it perfectly matches every time
+                if(onClickAttr.includes(`Maps('${highlightId}')`)) {
+                    a.classList.add('active');
+                }
             });
+            // -----------------------------------
             
             if(currentUser) {
                 localStorage.setItem('lastSection', id);
@@ -1580,7 +1590,6 @@
             if(document.getElementById('report-canvas')) document.getElementById('report-canvas').style.display = 'none';
             if(document.getElementById('resign-pdf-canvas')) document.getElementById('resign-pdf-canvas').style.display = 'none';
         }
-
         function toggleSidebar() { document.getElementById('sidebar').classList.toggle('closed'); }
 
         function applyConfigToSidebar() {
