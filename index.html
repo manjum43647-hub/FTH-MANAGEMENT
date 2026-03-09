@@ -1071,7 +1071,43 @@
             document.getElementById('viewer-full-img').src = '';
         }
 
+        //function closeCameraModal() {
+            document.getElementById('camera-modal').classList.add('hidden');
+            if(camStream) { camStream.getTracks().forEach(track => track.stop()); camStream = null; }
+            if(document.getElementById('manual-photo-btn')) document.getElementById('manual-photo-btn').disabled = false;
+        }
+
+        // --- UPDATED MAP LINKS AND LOG ENTRY ---
+        function formatLogEntry(timeStr, imgStr, locStr) {
+            if(!timeStr) return '<span style="color:var(--warning); font-weight:bold;">Waiting...</span>';
+            
+            let html = `<div style="display:flex; align-items:center; gap:10px;">`;
+            
+            if(imgStr) {
+                html += `<div onclick="openImageViewer('${imgStr}')" title="Click to View Full Photo" style="cursor:pointer; flex-shrink:0;">
+                             <img src="${imgStr}" style="width:45px; height:45px; border-radius:6px; object-fit:cover; border:1px solid #cbd5e1; box-shadow:0 2px 4px rgba(0,0,0,0.1);">
+                         </div>`;
+            } else {
+                html += `<div style="width:45px; height:45px; border-radius:6px; background:#f1f5f9; display:flex; align-items:center; justify-content:center; border:1px dashed #cbd5e1; color:#94a3b8; font-size:0.7rem; flex-shrink:0;">No Pic</div>`;
+            }
+
+            html += `<div><div style="font-weight:bold; color:var(--primary); font-size:0.9rem;">${timeStr}</div>`;
+            
+            if(locStr && locStr.includes(',')) {
+                // Fixed the Google Maps Link here
+                html += `<a href="https://www.google.com/maps?q=${locStr}" target="_blank" style="font-size:0.75rem; color:var(--success); text-decoration:none;"><i class="fa-solid fa-location-dot"></i> Open Map</a>`;
+            } else if(locStr) {
+                html += `<span style="font-size:0.7rem; color:#94a3b8;">(${locStr})</span>`;
+            } else {
+                html += `<span style="font-size:0.7rem; color:#94a3b8;">No GPS</span>`;
+            }
+            
+            html += `</div></div>`;
+            return html;
+        }
+
         // ---------------------------------------------------------
+        // LIVE CLOUD DATABASE ENGINE (FIREBASE) ---------------------------------------------------------
         // LIVE CLOUD DATABASE ENGINE (FIREBASE)
         // ---------------------------------------------------------
         const firebaseConfig = {
@@ -1292,12 +1328,19 @@
             document.getElementById('cam-capture-btn').classList.remove('hidden');
             
             if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
-                navigator.mediaDevices.getUserMedia({ video: true })
+                // Requesting front-facing camera specifically for selfies
+                navigator.mediaDevices.getUserMedia({ video: { facingMode: "user" } })
                     .then(stream => {
                         camStream = stream;
-                        document.getElementById('cam-video').srcObject = stream;
-                        document.getElementById('camera-status').innerText = "GPS & Camera Active. Ready to capture.";
-                        document.getElementById('cam-capture-btn').disabled = false;
+                        let video = document.getElementById('cam-video');
+                        video.srcObject = stream;
+                        
+                        // Wait for video to properly load dimensions before enabling the button
+                        video.onloadedmetadata = () => {
+                            video.play();
+                            document.getElementById('camera-status').innerText = "GPS & Camera Active. Ready to capture.";
+                            document.getElementById('cam-capture-btn').disabled = false;
+                        };
                     })
                     .catch(err => { fallbackToManualPhoto(); });
             } else {
@@ -1317,18 +1360,34 @@
             const video = document.getElementById('cam-video');
             const canvas = document.getElementById('cam-canvas');
             
-            const MAX_WIDTH = 800; 
             let width = video.videoWidth; 
             let height = video.videoHeight;
             
+            // Failsafe: if video hasn't rendered yet, wait!
+            if (width === 0 || height === 0) {
+                alert("Camera is warming up... Please try again in a second.");
+                return;
+            }
+            
+            // Compress the image to ensure it fits safely in the Firebase Database
+            const MAX_WIDTH = 400; 
             if (width > MAX_WIDTH) { height = Math.round((height * MAX_WIDTH) / width); width = MAX_WIDTH; }
             
             canvas.width = width;
             canvas.height = height;
             canvas.getContext('2d').drawImage(video, 0, 0, width, height);
             
-            const imgData = canvas.toDataURL('image/jpeg', 0.8); 
+            // Show loading text on button
+            document.getElementById('cam-capture-btn').innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Saving...';
+            document.getElementById('cam-capture-btn').disabled = true;
+            
+            const imgData = canvas.toDataURL('image/jpeg', 0.6); 
             finalizeClockAction(imgData, currentLocation);
+            
+            // Reset button text for next time
+            setTimeout(() => {
+                document.getElementById('cam-capture-btn').innerHTML = '<i class="fa-solid fa-camera"></i> Capture Photo';
+            }, 1000);
         }
 
         function handleManualPhoto(event) {
@@ -2617,7 +2676,7 @@
             if(r) { r.out = formatTimeAMPM(); r.outImg = img; r.outLoc = loc; r.endTimestamp = Date.now(); DB.set('attendance', att); checkClock(); } 
         }
         
-        function checkClock() { 
+       function checkClock() { 
             const r = DB.get('attendance').find(x => x.id === currentUser.id && x.date === new Date().toLocaleDateString()); 
             const btnIn = document.getElementById('btn-in'), btnOut = document.getElementById('btn-out'), timerDiv = document.getElementById('live-timer'), timesDiv = document.getElementById('log-times-display');
             clearInterval(liveTimerInterval); 
@@ -2635,7 +2694,8 @@
                 if(timesDiv) {
                     timesDiv.classList.remove('hidden');
                     let lateWarning = r.isLate ? ` <span style="color:var(--danger); font-size:0.7rem; padding:2px 5px; background:#fee2e2; border-radius:4px; margin-left:5px;">LATE</span>` : '';
-                    timesDiv.innerHTML = `<span style="color:var(--success);"><i class="fa-solid fa-play"></i> Started: ${r.in}</span>${lateWarning}`;
+                    let mapLink = r.inLoc ? ` | <a href="https://maps.google.com/?q=${r.inLoc}" target="_blank" style="color:var(--accent); text-decoration:none;"><i class="fa-solid fa-location-dot"></i> View Map</a>` : '';
+                    timesDiv.innerHTML = `<span style="color:var(--success);"><i class="fa-solid fa-play"></i> Started: ${r.in}</span>${lateWarning}${mapLink}`;
                 }
 
                 if(timerDiv) {
@@ -2656,7 +2716,9 @@
                 if(timesDiv) {
                     timesDiv.classList.remove('hidden');
                     let lateWarning = r.isLate ? ` <span style="color:var(--danger); font-size:0.7rem; padding:2px 5px; background:#fee2e2; border-radius:4px; margin-left:5px;">LATE</span>` : '';
-                    timesDiv.innerHTML = `<span style="color:var(--success);"><i class="fa-solid fa-play"></i> Started: ${r.in}</span>${lateWarning} &nbsp;|&nbsp; <span style="color:var(--danger);"><i class="fa-solid fa-stop"></i> Stopped: ${r.out}</span>`;
+                    let inMap = r.inLoc ? ` <a href="https://maps.google.com/?q=${r.inLoc}" target="_blank" style="color:var(--accent);"><i class="fa-solid fa-location-dot"></i></a>` : '';
+                    let outMap = r.outLoc ? ` <a href="https://maps.google.com/?q=${r.outLoc}" target="_blank" style="color:var(--accent);"><i class="fa-solid fa-location-dot"></i></a>` : '';
+                    timesDiv.innerHTML = `<span style="color:var(--success);"><i class="fa-solid fa-play"></i> Started: ${r.in}${inMap}</span>${lateWarning} &nbsp;|&nbsp; <span style="color:var(--danger);"><i class="fa-solid fa-stop"></i> Stopped: ${r.out}${outMap}</span>`;
                 }
 
                 if(timerDiv) {
