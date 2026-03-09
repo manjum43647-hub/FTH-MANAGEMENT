@@ -1545,9 +1545,10 @@
 
             document.querySelectorAll('.sidebar a').forEach(a => {
                 a.classList.remove('active');
-                let onClickAttr = a.getAttribute('onclick') || '';
-                // Use .includes() so it perfectly matches every time
-                if(onClickAttr.includes(`Maps('${highlightId}')`)) {
+                let onClickAttr = a.getAttribute('onclick');
+                
+                // We just check if the ID text exists ANYWHERE in the onclick attribute, ignoring quotes!
+                if(onClickAttr && onClickAttr.includes(highlightId)) {
                     a.classList.add('active');
                 }
             });
