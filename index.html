@@ -960,6 +960,7 @@
     </div> 
    </div> 
   </div> 
+  <div id="toast-container"></div>
 
   <script>
         // GLOBAL VARIABLES
@@ -983,6 +984,20 @@
         let currentUser = null;
         let lastAnnText = "";
 
+        function toggleSidebar() { document.getElementById('sidebar').classList.toggle('closed'); }
+
+        // --- NEW: Auto-close sidebar when clicking outside on mobile ---
+        document.addEventListener('click', function(event) {
+            if(window.innerWidth <= 768) {
+                const sidebar = document.getElementById('sidebar');
+                const menuToggle = document.querySelector('.menu-toggle');
+                if(sidebar && !sidebar.classList.contains('closed') && !sidebar.contains(event.target) && !menuToggle.contains(event.target)) {
+                    sidebar.classList.add('closed');
+                }
+            }
+        });
+
+        // --- UPDATED MAP LINKS AND LOG ENTRY ---
         function formatLogEntry(timeStr, imgStr, locStr) {
             if(!timeStr) return '<span style="color:var(--warning); font-weight:bold;">Waiting...</span>';
             
@@ -999,7 +1014,10 @@
             html += `<div><div style="font-weight:bold; color:var(--primary); font-size:0.9rem;">${timeStr}</div>`;
             
             if(locStr && locStr.includes(',')) {
-                html += `<a href="http://googleusercontent.com/maps.google.com/maps?q=${locStr}" target="_blank" style="font-size:0.75rem; color:var(--success); text-decoration:none;"><i class="fa-solid fa-location-dot"></i> Open Map</a>`;
+                let coords = locStr.split(',');
+                let shortLoc = `Lat: ${parseFloat(coords[0]).toFixed(4)}, Lng: ${parseFloat(coords[1]).toFixed(4)}`;
+                html += `<div style="font-size:0.7rem; color:#64748b; margin-top: 3px;">📍 ${shortLoc}</div>`;
+                html += `<a href="https://maps.google.com/?q=${locStr}" target="_blank" style="font-size:0.75rem; color:var(--success); text-decoration:none;"><i class="fa-solid fa-map-location-dot"></i> Open Map</a>`;
             } else if(locStr) {
                 html += `<span style="font-size:0.7rem; color:#94a3b8;">(${locStr})</span>`;
             } else {
@@ -1720,8 +1738,6 @@
             if(document.getElementById('report-canvas')) document.getElementById('report-canvas').style.display = 'none';
             if(document.getElementById('resign-pdf-canvas')) document.getElementById('resign-pdf-canvas').style.display = 'none';
         }
-
-        function toggleSidebar() { document.getElementById('sidebar').classList.toggle('closed'); }
 
         function applyConfigToSidebar() {
             let cfg = DB.get('config') || {};
@@ -2765,7 +2781,7 @@
                 if(timesDiv) {
                     timesDiv.classList.remove('hidden');
                     let lateWarning = r.isLate ? ` <span style="color:var(--danger); font-size:0.7rem; padding:2px 5px; background:#fee2e2; border-radius:4px; margin-left:5px;">LATE</span>` : '';
-                    let mapLink = r.inLoc ? `  |  <a href="http://googleusercontent.com/maps.google.com/maps?q=${r.inLoc}" target="_blank" style="color:var(--accent); text-decoration:none;"><i class="fa-solid fa-location-dot"></i> View Map</a>` : '';
+                    let mapLink = r.inLoc ? `  |  <a href="https://maps.google.com/?q=${r.inLoc}" target="_blank" style="color:var(--accent); text-decoration:none;"><i class="fa-solid fa-location-dot"></i> View Map</a>` : '';
                     timesDiv.innerHTML = `<span style="color:var(--success);"><i class="fa-solid fa-play"></i> Started: ${r.in}</span>${lateWarning}${mapLink}`;
                 }
 
@@ -2787,8 +2803,8 @@
                 if(timesDiv) {
                     timesDiv.classList.remove('hidden');
                     let lateWarning = r.isLate ? ` <span style="color:var(--danger); font-size:0.7rem; padding:2px 5px; background:#fee2e2; border-radius:4px; margin-left:5px;">LATE</span>` : '';
-                    let inMap = r.inLoc ? ` <a href="http://googleusercontent.com/maps.google.com/maps?q=${r.inLoc}" target="_blank" style="color:var(--accent);"><i class="fa-solid fa-location-dot"></i></a>` : '';
-                    let outMap = r.outLoc ? ` <a href="http://googleusercontent.com/maps.google.com/maps?q=${r.outLoc}" target="_blank" style="color:var(--accent);"><i class="fa-solid fa-location-dot"></i></a>` : '';
+                    let inMap = r.inLoc ? ` <a href="https://maps.google.com/?q=${r.inLoc}" target="_blank" style="color:var(--accent);"><i class="fa-solid fa-location-dot"></i></a>` : '';
+                    let outMap = r.outLoc ? ` <a href="https://maps.google.com/?q=${r.outLoc}" target="_blank" style="color:var(--accent);"><i class="fa-solid fa-location-dot"></i></a>` : '';
                     timesDiv.innerHTML = `<span style="color:var(--success);"><i class="fa-solid fa-play"></i> Started: ${r.in} ${inMap}</span>${lateWarning}  |  <span style="color:var(--danger);"><i class="fa-solid fa-stop"></i> Stopped: ${r.out} ${outMap}</span>`;
                 }
 
