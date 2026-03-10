@@ -562,7 +562,7 @@
       <p>Worked Days (This Month): <strong id="admin-ep-worked">0</strong></p> 
       <p>Leaves (This Month): <strong id="admin-ep-leaves">0</strong></p> 
       <p>Donations Logged: <strong id="admin-ep-donations-count" style="color:var(--primary);">0</strong></p> 
-      <p>Funds Raised: <strong id="admin-ep-donations-amt" style="color:var(--success);">₹0</strong></p> <button class="btn btn-warning btn-sm" style="margin-top:10px; width:100%;" onclick="viewStaffAttendance(currentAdminViewEmpId, currentAdminViewEmpName)"><i class="fa-solid fa-clock-rotate-left"></i> View Full History</button> 
+      <p>Funds Raised: <strong id="admin-ep-donations-amt" style="color:var(--success);">₹0</strong></p> 
      </div> 
     </div> 
     <div class="card no-print" style="margin-bottom: 20px;"> 
@@ -600,6 +600,24 @@
        </tr> 
       </thead> 
       <tbody id="admin-ep-donation-history"></tbody> 
+     </table> 
+    </div> 
+    
+    <div class="card no-print" style="overflow-x: auto; margin-bottom: 20px;"> 
+     <div style="display:flex; justify-content: space-between; align-items:center; margin-bottom:10px;"> 
+      <h3 style="margin:0;">Employee's Attendance History</h3> <button class="btn btn-success btn-sm" onclick="exportAdminSingleEmpAttendance()"><i class="fa-solid fa-file-excel"></i> Export</button> 
+     </div> 
+     <table style="width:100%"> 
+      <thead> 
+       <tr> 
+        <th>Date</th> 
+        <th>Start Photo & Time</th> 
+        <th>Stop Photo & Time</th> 
+        <th>Total Time</th> 
+        <th>Daily Notes</th> 
+       </tr> 
+      </thead> 
+      <tbody id="admin-ep-attendance-history"></tbody> 
      </table> 
     </div> 
    </div> 
@@ -1017,7 +1035,7 @@
                 let coords = locStr.split(',');
                 let shortLoc = `Lat: ${parseFloat(coords[0]).toFixed(4)}, Lng: ${parseFloat(coords[1]).toFixed(4)}`;
                 html += `<div style="font-size:0.7rem; color:#64748b; margin-top: 3px;">📍 ${shortLoc}</div>`;
-                html += `<a href="https://maps.google.com/?q=${locStr}" target="_blank" style="font-size:0.75rem; color:var(--success); text-decoration:none;"><i class="fa-solid fa-map-location-dot"></i> Open Map</a>`;
+                html += `<a href="http://googleusercontent.com/maps.google.com/maps?q=${locStr}" target="_blank" style="font-size:0.75rem; color:var(--success); text-decoration:none;"><i class="fa-solid fa-map-location-dot"></i> Open Map</a>`;
             } else if(locStr) {
                 html += `<span style="font-size:0.7rem; color:#94a3b8;">(${locStr})</span>`;
             } else {
@@ -2005,6 +2023,20 @@
             records.forEach(r => { csv += `${r.cat},${r.amt},${r.status}\n`; });
             let a = document.createElement('a'); a.href = 'data:text/csv;charset=utf-8,' + encodeURI(csv); a.download = 'My_Expenses.csv'; a.click();
         }
+        
+        function exportAdminSingleEmpAttendance() {
+            if(!currentAdminViewEmpId) return;
+            let csv = 'Date,Started Time,Stopped Time,Total Worked,Notes\n';
+            const records = DB.get('attendance').filter(a => a.id === currentAdminViewEmpId).reverse();
+            records.forEach(r => {
+                const outTime = r.out ? r.out : 'Working...'; let duration = '-';
+                if(r.startTimestamp && r.endTimestamp) { duration = formatDuration(r.endTimestamp - r.startTimestamp); } else if(r.startTimestamp && !r.out) { duration = 'In Progress'; }
+                const notesStr = (r.notes || []).map(n => `[${n.time}] ${n.text}`).join(' | ').replace(/,/g, ';'); 
+                csv += `${r.date},${r.in} (${r.inLoc || ''}),${outTime} (${r.outLoc || ''}),${duration},${notesStr}\n`;
+            });
+            let a = document.createElement('a'); a.href = 'data:text/csv;charset=utf-8,' + encodeURI(csv); 
+            a.download = `${currentAdminViewEmpName.replace(/\s+/g, '_')}_Attendance_History.csv`; a.click();
+        }
 
         function loadAdminStats() {
             const emps = DB.get('employees').filter(e => e.role !== 'admin');
@@ -2141,6 +2173,26 @@
                         <td>${x.insta || '-'}</td>
                     </tr>
                 `).join('');
+            }
+
+            // --- Employee Specific Attendance History ---
+            const empAttendance = DB.get('attendance').filter(a => a.id === emp.id).reverse();
+            const attTable = document.getElementById('admin-ep-attendance-history');
+            if(empAttendance.length === 0) {
+                attTable.innerHTML = '<tr><td colspan="5" style="text-align:center; padding:20px; color:#64748b;">No attendance records found for this staff member.</td></tr>';
+            } else {
+                attTable.innerHTML = empAttendance.map(r => {
+                    const inHtml = formatLogEntry(r.in, r.inImg, r.inLoc) + (r.isLate ? `<div style="color:var(--danger); font-size:0.75rem; font-weight:bold; margin-top:2px;">(LATE)</div>` : '');
+                    const outHtml = formatLogEntry(r.out, r.outImg, r.outLoc);
+                    
+                    let duration = '-';
+                    if(r.startTimestamp && r.endTimestamp) { duration = formatDuration(r.endTimestamp - r.startTimestamp); } 
+                    else if(r.startTimestamp && !r.out) { duration = `<span class="live-table-tick" data-start="${r.startTimestamp}"><i class="fa-solid fa-spinner fa-spin"></i> Running...</span>`; }
+                    else if(!r.out) { duration = `<span style="color:var(--warning); font-weight:bold;">Working...</span>`; }
+
+                    const notesHtml = (r.notes || []).map(n => `<div style="font-size:0.75rem; margin-bottom:3px;"><span style="color:var(--accent); font-weight:bold;">${n.time}</span> - ${n.text}</div>`).join('');
+                    return `<tr><td>${r.date}</td><td>${inHtml}</td><td>${outHtml}</td><td style="font-weight:bold; color:var(--primary);">${duration}</td><td>${notesHtml || '<span style="color:#94a3b8; font-size:0.8rem;">-</span>'}</td></tr>`;
+                }).join('');
             }
 
             renderAdminEmployeeCharts(emp.id);
@@ -2593,7 +2645,6 @@
                     const picHtml = e.pic ? `<img src="${e.pic}" style="width:35px;height:35px;border-radius:50%;object-fit:cover;border:1px solid #cbd5e1;">` : `<i class="fa-solid fa-user-circle" style="font-size:30px;color:#cbd5e1;"></i>`;
                     l.innerHTML += `<tr><td>${picHtml}</td><td style="padding:10px;">${e.id}</td><td>${e.name}</td><td>${e.phone || '-'}</td><td>${e.email || '-'}</td><td style="color:var(--danger)">${e.pass}</td><td>₹${e.salary}</td><td>
                         <button class="btn btn-info btn-sm" style="background:#0284c7; color:white;" title="View Full Profile" onclick="viewEmployeeProfile('${e.id}')"><i class="fa-solid fa-id-badge"></i></button>
-                        <button class="btn btn-warning btn-sm" title="View Attendance" onclick="viewStaffAttendance('${e.id}', '${e.name}')"><i class="fa-solid fa-clock-rotate-left"></i></button> 
                         <button class="btn btn-primary btn-sm" title="Edit" onclick="editStaff('${e.id}')"><i class="fa-solid fa-pen"></i></button> 
                         <button class="btn btn-danger btn-sm" title="Delete" onclick="deleteStaff('${e.id}')"><i class="fa-solid fa-trash"></i></button>
                     </td></tr>`;
@@ -2781,7 +2832,7 @@
                 if(timesDiv) {
                     timesDiv.classList.remove('hidden');
                     let lateWarning = r.isLate ? ` <span style="color:var(--danger); font-size:0.7rem; padding:2px 5px; background:#fee2e2; border-radius:4px; margin-left:5px;">LATE</span>` : '';
-                    let mapLink = r.inLoc ? `  |  <a href="https://maps.google.com/?q=${r.inLoc}" target="_blank" style="color:var(--accent); text-decoration:none;"><i class="fa-solid fa-location-dot"></i> View Map</a>` : '';
+                    let mapLink = r.inLoc ? `  |  <a href="http://googleusercontent.com/maps.google.com/maps?q=${r.inLoc}" target="_blank" style="color:var(--accent); text-decoration:none;"><i class="fa-solid fa-location-dot"></i> View Map</a>` : '';
                     timesDiv.innerHTML = `<span style="color:var(--success);"><i class="fa-solid fa-play"></i> Started: ${r.in}</span>${lateWarning}${mapLink}`;
                 }
 
@@ -2803,8 +2854,8 @@
                 if(timesDiv) {
                     timesDiv.classList.remove('hidden');
                     let lateWarning = r.isLate ? ` <span style="color:var(--danger); font-size:0.7rem; padding:2px 5px; background:#fee2e2; border-radius:4px; margin-left:5px;">LATE</span>` : '';
-                    let inMap = r.inLoc ? ` <a href="https://maps.google.com/?q=${r.inLoc}" target="_blank" style="color:var(--accent);"><i class="fa-solid fa-location-dot"></i></a>` : '';
-                    let outMap = r.outLoc ? ` <a href="https://maps.google.com/?q=${r.outLoc}" target="_blank" style="color:var(--accent);"><i class="fa-solid fa-location-dot"></i></a>` : '';
+                    let inMap = r.inLoc ? ` <a href="http://googleusercontent.com/maps.google.com/maps?q=${r.inLoc}" target="_blank" style="color:var(--accent);"><i class="fa-solid fa-location-dot"></i></a>` : '';
+                    let outMap = r.outLoc ? ` <a href="http://googleusercontent.com/maps.google.com/maps?q=${r.outLoc}" target="_blank" style="color:var(--accent);"><i class="fa-solid fa-location-dot"></i></a>` : '';
                     timesDiv.innerHTML = `<span style="color:var(--success);"><i class="fa-solid fa-play"></i> Started: ${r.in} ${inMap}</span>${lateWarning}  |  <span style="color:var(--danger);"><i class="fa-solid fa-stop"></i> Stopped: ${r.out} ${outMap}</span>`;
                 }
 
